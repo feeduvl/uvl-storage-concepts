@@ -1,0 +1,40 @@
+== ri-storage-twitter image:https://img.shields.io/badge/License-EPL%202.0-blue.svg["EPL 2.0", link="https://www.eclipse.org/legal/epl-2.0/"]
+
+This service was created as a result of the OpenReq project funded by the European Union Horizon 2020 Research and Innovation programme under grant agreement No 732463.
+
+=== Used Technologies
+- Go (-> https://github.com/golang/go)
+- Gorilla Mux (-> https://github.com/gorilla/mux)
+- MongoDB (-> https://www.mongodb.com/)
+
+=== Functionalities 
+The ri-storage-twitter microservice represents an interface to a database persisting all JSON objects related to Twitter data.
+
+=== Installation
+*ri-storage-twitter* requires a installed distribution of Go link:[https://golang.org/doc/install] as well as a Mongo database running on a local or a remote host.
+The IP adress of the Mongo database is passed as a Docker environment variable with the key *MONGO_IP*.
+
+=== How to Run The microservice
+
+Run the following commands to start the microservice:
+
+1) docker build -t ri-storage-twitter .
+2) docker run -e "MONGO_IP=<mydbip>" -p 9682:9682 ri-storage-twitter
+
+The IP adresss of the Mongo Database in which to store Twitter data is passed through the environment variable MONGO_IP.
+<mydbip> should be set by the IP adress of your database.
+
+A full description of the the microservice can be found in the following swagger documentation:
+
+== Public APIs
+The API is documented by using Swagger2:
+
+- link:https://github.com/OpenReqEU/ri-storage-twitter/blob/master/swagger.yaml[Raw Documentation]
+
+- link:http://217.172.12.199/registry/#/services/ri-storage-twitter[Rendered Documentation]
+
+== How to contribute
+See OpenReq project contribution link:https://github.com/OpenReqEU/OpenReq/blob/master/CONTRIBUTING.md[Guidlines]
+
+== License
+Free use of this software is granted under the terms of the EPL version 2 (EPL2.0).
