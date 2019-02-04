@@ -95,7 +95,9 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 // MongoInsertTweets returns ok if the tweet was inserted or already existed
 func MongoInsertTweets(mongoClient *mgo.Session, tweets []Tweet) bool {
 	for _, tweet := range tweets {
-		err := mongoClient.DB(database).C(collectionTweet).Insert(tweet)
+		query := bson.M{"status_id": tweet.StatusID}
+		update := bson.M{"$set": tweet}
+		_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 		if err != nil && !mgo.IsDup(err) {
 			fmt.Println(err)
 		}
