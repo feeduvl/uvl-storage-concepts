@@ -2,16 +2,16 @@
 
 This service was created as a result of the OpenReq project funded by the European Union Horizon 2020 Research and Innovation programme under grant agreement No 732463.
 
-== Used Technologies
+== Technical description
+=== What does the microservice do
+The ri-storage-twitter microservice represents an interface to a database persisting all JSON objects related to Twitter data. It can store tweets, Twitter accounts that should be observed by the link:https://github.com/OpenReqEU/ri-orchestration-twitter[ri-orchestration-twitter] ms. It also returns tweets and observed accounts.
+
+=== Which technologies are used
 - Go (-> https://github.com/golang/go)
 - Gorilla Mux (-> https://github.com/gorilla/mux)
 - MongoDB (-> https://www.mongodb.com/)
 
-== Functionalities 
-The ri-storage-twitter microservice represents an interface to a database persisting all JSON objects related to Twitter data.
-
-== How to Run The microservice
-
+=== How to install it
 Run the following commands to start the microservice:
 
 1) docker build -t ri-storage-twitter .
@@ -20,12 +20,17 @@ Run the following commands to start the microservice:
 The IP adresss of the Mongo Database in which to store Twitter data is passed through the environment variable MONGO_IP.
 <mydbip> should be set by the IP adress of your database.
 
-A full description of the the microservice can be found in the following swagger documentation:
-
-== Public APIs
+=== How to use it (high-level description)
 The API is documented by using Swagger2:
 
 - link:http://217.172.12.199/registry/#/services/ri-storage-twitter[Rendered Documentation]
+
+=== Notes for developers 
+None.
+
+=== Sources
+None.
+
 
 == How to contribute
 See OpenReq project contribution link:https://github.com/OpenReqEU/OpenReq/blob/master/CONTRIBUTING.md[Guidlines]
