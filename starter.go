@@ -51,13 +51,13 @@ func postTweet(w http.ResponseWriter, r *http.Request) {
 	var tweets []Tweet
 	err := json.NewDecoder(r.Body).Decode(&tweets)
 	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	err = validateTweets(tweets)
 	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
