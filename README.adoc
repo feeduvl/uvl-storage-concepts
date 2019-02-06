@@ -14,8 +14,8 @@ The ri-storage-twitter microservice represents an interface to a database persis
 === How to install it
 Run the following commands to start the microservice:
 
-1) docker build -t ri-storage-twitter .
-2) docker run -e "MONGO_IP=<mydbip>" -p 9682:9682 ri-storage-twitter
+. docker build -t ri-storage-twitter .
+. docker run -e "MONGO_IP=<mydbip>" -p 9682:9682 ri-storage-twitter
 
 The IP adresss of the Mongo Database in which to store Twitter data is passed through the environment variable MONGO_IP.
 <mydbip> should be set by the IP adress of your database.
