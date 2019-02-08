@@ -51,6 +51,17 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	if err != nil {
 		panic(err)
 	}
+	// Index
+	tweetSecondIndex := mgo.Index{
+		Key:        []string{"text", "user_name"},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	err = tweetCollection.EnsureIndex(tweetSecondIndex)
+	if err != nil {
+		panic(err)
+	}
 
 	// Index
 	twitterProfileIndex := mgo.Index{
