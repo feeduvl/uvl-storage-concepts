@@ -17,7 +17,7 @@ type Tweet struct {
 	Sentiment           string   `json:"sentiment" bson:"sentiment"`
 	SentimentScore      int      `json:"sentiment_score" bson:"sentiment_score"`
 	TweetClass          string   `json:"tweet_class" bson:"tweet_class"`
-	ClassifierCertainty int      `json:"classifier_certainty"`
+	ClassifierCertainty int      `json:"classifier_certainty" bson:"classifier_certainty"`
 }
 
 func (tweet *Tweet) validate() error {
