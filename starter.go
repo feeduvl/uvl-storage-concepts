@@ -30,6 +30,7 @@ func main() {
 	router := mux.NewRouter()
 	// Insert
 	router.HandleFunc("/hitec/repository/twitter/store/tweet/", postTweet).Methods("POST")
+	router.HandleFunc("/ri-storage-twitter/store/classified/tweet/", postClassifiedTweet).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/store/observable/", postObservableTwitter).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/label/tweet/", postLabelTwitter).Methods("POST")
 
@@ -66,6 +67,31 @@ func postTweet(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	MongoInsertTweets(m, tweets)
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}
+
+func postClassifiedTweet(w http.ResponseWriter, r *http.Request) {
+	var tweets []Tweet
+	err := json.NewDecoder(r.Body).Decode(&tweets)
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = validateTweets(tweets)
+	if err != nil {
+		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	MongoUpdateTweetsSentimentAndClass(m, tweets)
 
 	// send response
 	w.WriteHeader(http.StatusOK)

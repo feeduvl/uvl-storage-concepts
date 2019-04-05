@@ -106,8 +106,25 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 // MongoInsertTweets returns ok if the tweet was inserted or already existed
 func MongoInsertTweets(mongoClient *mgo.Session, tweets []Tweet) bool {
 	for _, tweet := range tweets {
+		err := mongoClient.DB(database).C(collectionTweet).Insert(tweet)
+		if err != nil && !mgo.IsDup(err) {
+			fmt.Println(err)
+			return false
+		}
+	}
+
+	return true
+}
+
+// MongoUpdateTweetsSentimentAndClass returns ok if the tweet was inserted or already existed
+func MongoUpdateTweetsSentimentAndClass(mongoClient *mgo.Session, tweets []Tweet) bool {
+	for _, tweet := range tweets {
 		query := bson.M{"status_id": tweet.StatusID}
-		update := bson.M{"$set": tweet}
+		update := bson.M{"$set": bson.M{
+			"sentiment":       tweet.Sentiment,
+			"sentiment_score": tweet.SentimentScore,
+			"tweet_class":     tweet.TweetClass,
+		}}
 		_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 		if err != nil && !mgo.IsDup(err) {
 			fmt.Println(err)
