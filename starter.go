@@ -30,7 +30,7 @@ func main() {
 	router := mux.NewRouter()
 	// Insert
 	router.HandleFunc("/hitec/repository/twitter/store/tweet/", postTweet).Methods("POST")
-	router.HandleFunc("/ri-storage-twitter/store/classified/tweet/", postClassifiedTweet).Methods("POST")
+	router.HandleFunc("/hitec/repository/twitter/store/classified/tweet/", postClassifiedTweet).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/store/observable/", postObservableTwitter).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/label/tweet/", postLabelTwitter).Methods("POST")
 
@@ -87,6 +87,7 @@ func postClassifiedTweet(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("REST call (postClassifiedTweet): update %v tweets\n", len(tweets))
 
 	// insert data into the db
 	m := mongoClient.Copy()

@@ -121,13 +121,15 @@ func MongoUpdateTweetsSentimentAndClass(mongoClient *mgo.Session, tweets []Tweet
 	for _, tweet := range tweets {
 		query := bson.M{"status_id": tweet.StatusID}
 		update := bson.M{"$set": bson.M{
-			"sentiment":       tweet.Sentiment,
-			"sentiment_score": tweet.SentimentScore,
-			"tweet_class":     tweet.TweetClass,
+			"sentiment":            tweet.Sentiment,
+			"sentiment_score":      tweet.SentimentScore,
+			"tweet_class":          tweet.TweetClass,
+			"classifier_certainty": tweet.ClassifierCertainty,
 		}}
 		_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 		if err != nil && !mgo.IsDup(err) {
 			fmt.Println(err)
+			return false
 		}
 	}
 
