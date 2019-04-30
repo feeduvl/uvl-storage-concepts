@@ -298,10 +298,10 @@ func MongoInsertTweetLabel(mongoClient *mgo.Session, tweetLabel TweetLabel) bool
 	return true
 }
 
-// MongoUpdateTweetClassAndCertainty is called when a human provides an annotation for a tweet. It updates the tweet class and certainty
-func MongoUpdateTweetClassAndCertainty(mongoClient *mgo.Session, tweetLabel TweetLabel) bool {
+// MongoUpdateTweetClassAndAnnotation is called when a human provides an annotation for a tweet
+func MongoUpdateTweetClassAndAnnotation(mongoClient *mgo.Session, tweetLabel TweetLabel) bool {
 	query := bson.M{"status_id": tweetLabel.StatusID}
-	update := bson.M{"$set": bson.M{"tweet_class": tweetLabel.Label, "classifier_certainty": 100}}
+	update := bson.M{"$set": bson.M{"tweet_class": tweetLabel.Label, "is_annotated": true}}
 	_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)

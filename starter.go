@@ -153,8 +153,7 @@ func postLabelTwitter(w http.ResponseWriter, r *http.Request) {
 	defer m.Close()
 	insertionOk := MongoInsertTweetLabel(m, tweetLabel)
 
-	// update the class certainty to 100%
-	updateOk := MongoUpdateTweetClassAndCertainty(m, tweetLabel)
+	updateOk := MongoUpdateTweetClassAndAnnotation(m, tweetLabel)
 
 	// send response
 	if insertionOk && updateOk {
