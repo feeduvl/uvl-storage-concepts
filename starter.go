@@ -39,9 +39,12 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all", getAllTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all/unlabeled", getAllUnlabeledTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/currentweek", getAllTweetsOfAccountForCurrentWeek).Methods("GET")
+	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/unclassified", getAllUnclassifiedTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
+
+	// Delete
 	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
 
 	fmt.Println("ri-storage-twitter MS running")
@@ -192,6 +195,23 @@ func getAllTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	tweets := MongoGetAllTweetsOfAccountName(m, accountName)
+
+	// write the response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tweets)
+}
+
+func getAllUnclassifiedTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	accountName := params["account_name"]
+
+	fmt.Printf("REST call: getAllUnclassifiedTweetsOfAccount, account %s\n", accountName)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	tweets := MongoGetUnclassifiedAllTweetsOfAccountName(m, accountName)
 
 	// write the response
 	w.Header().Set("Content-Type", "application/json")

@@ -168,6 +168,22 @@ func MongoGetAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string
 	return tweets
 }
 
+// MongoGetUnclassifiedAllTweetsOfAccountName returns all tweets belonging to one specific twitter page
+func MongoGetUnclassifiedAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string) []Tweet {
+	var tweets []Tweet
+	err := mongoClient.
+		DB(database).
+		C(collectionTweet).
+		Find(bson.M{"in_reply_to_screen_name": accountName, "tweet_class": ""}).
+		All(&tweets)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+	//, "created_at_full": bson.M{"$exists": true}
+	return tweets
+}
+
 // MongoGetAllUnlabeledTweetsOfAccountName returns all tweets of a Twitter account that are not manually labeled yet.
 func MongoGetAllUnlabeledTweetsOfAccountName(mongoClient *mgo.Session, accountName string) []Tweet {
 	var tweets []Tweet
