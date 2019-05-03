@@ -136,7 +136,7 @@ paths:
             $ref: "#/definitions/Tweets"
         400:
           description: bad input parameter or no tweet could be retrieved.
-  /account_name/{account_name}/unclassified:
+  /account_name/{account_name}/lang/{lang}/unclassified:
     get:
       summary: Get all tweets belonging to the given twitter profile which had not ben classified yet.
       description: Get all tweets belonging to the given twitter profile which had not ben classified yet.
@@ -145,6 +145,11 @@ paths:
         - name: account_name
           in: path
           description: the unique account name of a twitter user.
+          required: true
+          type: string
+        - name: lang
+          in: path
+          description: the language the tweets are written in.
           required: true
           type: string
       responses:

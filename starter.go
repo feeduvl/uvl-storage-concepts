@@ -39,7 +39,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all", getAllTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all/unlabeled", getAllUnlabeledTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/currentweek", getAllTweetsOfAccountForCurrentWeek).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/unclassified", getAllUnclassifiedTweetsOfAccount).Methods("GET")
+	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/lang/{lang}/unclassified", getAllUnclassifiedTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
@@ -206,12 +206,13 @@ func getAllUnclassifiedTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
 	accountName := params["account_name"]
+	lang := params["lang"]
 
-	fmt.Printf("REST call: getAllUnclassifiedTweetsOfAccount, account %s\n", accountName)
+	fmt.Printf("REST call: getAllUnclassifiedTweetsOfAccount, account %s and lang %s \n", accountName, lang)
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	tweets := MongoGetUnclassifiedAllTweetsOfAccountName(m, accountName)
+	tweets := MongoGetUnclassifiedAllTweetsOfAccountName(m, accountName, lang)
 
 	// write the response
 	w.Header().Set("Content-Type", "application/json")

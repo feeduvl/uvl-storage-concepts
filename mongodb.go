@@ -169,12 +169,12 @@ func MongoGetAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string
 }
 
 // MongoGetUnclassifiedAllTweetsOfAccountName returns all tweets belonging to one specific twitter page
-func MongoGetUnclassifiedAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string) []Tweet {
+func MongoGetUnclassifiedAllTweetsOfAccountName(mongoClient *mgo.Session, accountName, lang string) []Tweet {
 	var tweets []Tweet
 	err := mongoClient.
 		DB(database).
 		C(collectionTweet).
-		Find(bson.M{"in_reply_to_screen_name": accountName, "tweet_class": ""}).
+		Find(bson.M{"in_reply_to_screen_name": accountName, "tweet_class": "", "lang": lang}).
 		All(&tweets)
 	if err != nil {
 		fmt.Println("ERR", err)
