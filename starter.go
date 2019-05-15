@@ -16,6 +16,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	contentTypeKey     = "Content-Type"
+	contentTypeValJSON = "application/json"
+)
+
 var mongoClient *mgo.Session
 
 func main() {
@@ -73,7 +78,7 @@ func postTweet(w http.ResponseWriter, r *http.Request) {
 
 	// send response
 	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func postClassifiedTweet(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +104,7 @@ func postClassifiedTweet(w http.ResponseWriter, r *http.Request) {
 
 	// send response
 	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func postObservableTwitter(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +136,7 @@ func postObservableTwitter(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func postLabelTwitter(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +169,7 @@ func postLabelTwitter(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
@@ -180,7 +185,7 @@ func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
 	tweets := MongoGetTweetOfClass(m, tweetedToName, tweetClass)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tweets)
 }
@@ -197,7 +202,7 @@ func getAllTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
 	tweets := MongoGetAllTweetsOfAccountName(m, accountName)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tweets)
 }
@@ -215,7 +220,7 @@ func getAllUnclassifiedTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
 	tweets := MongoGetUnclassifiedAllTweetsOfAccountName(m, accountName, lang)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tweets)
 }
@@ -232,7 +237,7 @@ func getAllUnlabeledTweetsOfAccount(w http.ResponseWriter, r *http.Request) {
 	tweets := MongoGetAllUnlabeledTweetsOfAccountName(m, accountName)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if len(tweets) > 0 {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(tweets)
@@ -257,7 +262,7 @@ func getAllTweetsOfAccountForCurrentWeek(w http.ResponseWriter, r *http.Request)
 	tweets := MongoGetAllTweetsOfAccountForCurrentWeek(m, accountName, from, to)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(tweets)
 }
@@ -273,7 +278,7 @@ func getAllTwitterAccountNames(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("REST call: getAllTwitterAccountNames, result %v\n", twitterAccounts)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(twitterAccounts)
 }
@@ -284,7 +289,7 @@ func getAllLabeledTweets(w http.ResponseWriter, r *http.Request) {
 	labeledTweets := MongoGetAllLabeledTweets(m)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(labeledTweets)
 }
@@ -295,7 +300,7 @@ func getObservablesTwitter(w http.ResponseWriter, r *http.Request) {
 	observables := MongoGetAllObservableTwitter(m)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(observables)
 }
@@ -314,7 +319,7 @@ func deleteObservableTwitter(w http.ResponseWriter, r *http.Request) {
 	ok := MongoDeleteObservableTwitter(m, observable)
 
 	// write the response
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if ok {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "observable successfully deleted", Status: true})
