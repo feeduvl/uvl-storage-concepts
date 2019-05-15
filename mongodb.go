@@ -15,6 +15,19 @@ const (
 	collectionTwitterProfile    = "twitter_profile"
 	collectionObservableTwitter = "observable_twitter"
 	collectionTweetLabel        = "tweet_label"
+
+	fieldInReplyToScreenName = "in_reply_to_screen_name"
+	fieldStatusId            = "status_id"
+	fieldAccountName         = "account_name"
+	fieldLang                = "lang"
+	fieldText                = "text"
+	fieldUserName            = "user_name"
+	fieldProfileName         = "profile_name"
+	fieldSentiment           = "sentiment"
+	fieldSentimentScore      = "sentiment_score"
+	fieldTweetClass          = "tweet_class"
+	fieldClassifierCertainty = "classifier_certainty"
+	fieldIsAnnotated         = "is_annotated"
 )
 
 // MongoGetSession returns a session
@@ -41,7 +54,7 @@ func MongoGetSession(mongoIP, username, password string) *mgo.Session {
 func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	// Index
 	tweetIndex := mgo.Index{
-		Key:        []string{"status_id"},
+		Key:        []string{fieldStatusId},
 		Unique:     true,
 		Background: true,
 		Sparse:     true,
@@ -53,7 +66,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	}
 	// Index
 	tweetSecondIndex := mgo.Index{
-		Key:        []string{"text", "user_name"},
+		Key:        []string{fieldText, fieldUserName},
 		Unique:     true,
 		Background: true,
 		Sparse:     true,
@@ -65,7 +78,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 
 	// Index
 	twitterProfileIndex := mgo.Index{
-		Key:        []string{"profile_name"},
+		Key:        []string{fieldProfileName},
 		Unique:     true,
 		Background: true,
 		Sparse:     true,
@@ -78,7 +91,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 
 	// Index
 	observableTwitterIndex := mgo.Index{
-		Key:        []string{"account_name", "lang"},
+		Key:        []string{fieldAccountName, fieldLang},
 		Unique:     true,
 		Background: true,
 		Sparse:     true,
@@ -91,7 +104,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 
 	// Index
 	tweetLabelIndex := mgo.Index{
-		Key:        []string{"status_id"},
+		Key:        []string{fieldStatusId},
 		Unique:     true,
 		Background: true,
 		Sparse:     true,
@@ -119,12 +132,12 @@ func MongoInsertTweets(mongoClient *mgo.Session, tweets []Tweet) bool {
 // MongoUpdateTweetsSentimentAndClass returns ok if the tweet was inserted or already existed
 func MongoUpdateTweetsSentimentAndClass(mongoClient *mgo.Session, tweets []Tweet) bool {
 	for _, tweet := range tweets {
-		query := bson.M{"status_id": tweet.StatusID}
+		query := bson.M{fieldStatusId: tweet.StatusID}
 		update := bson.M{"$set": bson.M{
-			"sentiment":            tweet.Sentiment,
-			"sentiment_score":      tweet.SentimentScore,
-			"tweet_class":          tweet.TweetClass,
-			"classifier_certainty": tweet.ClassifierCertainty,
+			fieldSentiment:           tweet.Sentiment,
+			fieldSentimentScore:      tweet.SentimentScore,
+			fieldTweetClass:          tweet.TweetClass,
+			fieldClassifierCertainty: tweet.ClassifierCertainty,
 		}}
 		_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 		if err != nil && !mgo.IsDup(err) {
@@ -142,7 +155,7 @@ func MongoGetTweetOfClass(mongoClient *mgo.Session, tweetedToName string, tweetC
 	err := mongoClient.
 		DB(database).
 		C(collectionTweet).
-		Find(bson.M{"in_reply_to_screen_name": tweetedToName, "tweet_class": tweetClass}).
+		Find(bson.M{fieldInReplyToScreenName: tweetedToName, fieldTweetClass: tweetClass}).
 		All(&tweets)
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -158,7 +171,7 @@ func MongoGetAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string
 	err := mongoClient.
 		DB(database).
 		C(collectionTweet).
-		Find(bson.M{"in_reply_to_screen_name": accountName}).
+		Find(bson.M{fieldInReplyToScreenName: accountName}).
 		All(&tweets)
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -174,7 +187,7 @@ func MongoGetUnclassifiedAllTweetsOfAccountName(mongoClient *mgo.Session, accoun
 	err := mongoClient.
 		DB(database).
 		C(collectionTweet).
-		Find(bson.M{"in_reply_to_screen_name": accountName, "tweet_class": "", "lang": lang}).
+		Find(bson.M{fieldInReplyToScreenName: accountName, fieldTweetClass: "", fieldLang: lang}).
 		All(&tweets)
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -204,8 +217,8 @@ func MongoGetAllUnlabeledTweetsOfAccountName(mongoClient *mgo.Session, accountNa
 	}
 
 	var query = make(bson.M)
-	query["in_reply_to_screen_name"] = accountName
-	query["status_id"] = bson.M{"$nin": tweetsToExclude}
+	query[fieldInReplyToScreenName] = accountName
+	query[fieldStatusId] = bson.M{"$nin": tweetsToExclude}
 
 	err = mongoClient.
 		DB(database).
@@ -226,7 +239,7 @@ func MongoGetAllTweetsOfAccountForCurrentWeek(mongoClient *mgo.Session, accountN
 	pipeline := []bson.M{bson.M{
 		"$match": bson.M{
 			"$and": []bson.M{bson.M{
-				"in_reply_to_screen_name": accountName,
+				fieldInReplyToScreenName: accountName,
 				"created_at": bson.M{
 					"$gte": from,
 					"$lte": to,
@@ -254,7 +267,7 @@ func MongoGetAllTwitterAccounts(mongoClient *mgo.Session) TwitterAccount {
 		DB(database).
 		C(collectionTweet).
 		Find(nil).
-		Distinct("in_reply_to_screen_name", &twitterAccountsRaw)
+		Distinct(fieldInReplyToScreenName, &twitterAccountsRaw)
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
@@ -267,7 +280,7 @@ func MongoGetAllTwitterAccounts(mongoClient *mgo.Session) TwitterAccount {
 
 // MongoInsertObservableTwitter returns ok if the package name was inserted or already existed
 func MongoInsertObservableTwitter(mongoClient *mgo.Session, observable ObservableTwitter) bool {
-	query := bson.M{"account_name": observable.AccountName}
+	query := bson.M{fieldAccountName: observable.AccountName}
 	update := bson.M{"$set": observable}
 	_, err := mongoClient.DB(database).C(collectionObservableTwitter).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
@@ -299,7 +312,7 @@ func MongoDeleteObservableTwitter(mongoClient *mgo.Session, observable Observabl
 	_, err := mongoClient.
 		DB(database).
 		C(collectionObservableTwitter).
-		RemoveAll(bson.M{"account_name": observable.AccountName})
+		RemoveAll(bson.M{fieldAccountName: observable.AccountName})
 
 	return err == nil
 }
@@ -316,8 +329,8 @@ func MongoInsertTweetLabel(mongoClient *mgo.Session, tweetLabel TweetLabel) bool
 
 // MongoUpdateTweetClassAndAnnotation is called when a human provides an annotation for a tweet
 func MongoUpdateTweetClassAndAnnotation(mongoClient *mgo.Session, tweetLabel TweetLabel) bool {
-	query := bson.M{"status_id": tweetLabel.StatusID}
-	update := bson.M{"$set": bson.M{"tweet_class": tweetLabel.Label, "is_annotated": true}}
+	query := bson.M{fieldStatusId: tweetLabel.StatusID}
+	update := bson.M{"$set": bson.M{fieldTweetClass: tweetLabel.Label, fieldIsAnnotated: true}}
 	_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
