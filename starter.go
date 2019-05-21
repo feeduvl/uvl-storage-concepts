@@ -313,6 +313,7 @@ func deleteObservableTwitter(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	fmt.Printf("REST call: deleteObservableTwitter for %v\n", observable)
 
 	m := mongoClient.Copy()
 	defer m.Close()
