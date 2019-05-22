@@ -38,6 +38,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/store/classified/tweet/", postClassifiedTweet).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/store/observable/", postObservableTwitter).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/label/tweet/", postLabelTwitter).Methods("POST")
+	router.HandleFunc("/hitec/repository/twitter/store/topics", postTweetTopics).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/class/{tweet_class}", getTweetOfClass).Methods("GET")
@@ -165,6 +166,31 @@ func postLabelTwitter(w http.ResponseWriter, r *http.Request) {
 
 	// send response
 	if insertionOk && updateOk {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func postTweetTopics(w http.ResponseWriter, r *http.Request) {
+	var tweet Tweet
+	err := json.NewDecoder(r.Body).Decode(&tweet)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("REST call (postTweetTopics)\n")
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	updateOk := MongoUpdateTweetTopics(m, tweet)
+
+	// send response
+	if updateOk {
 		w.WriteHeader(http.StatusOK)
 	} else {
 		w.WriteHeader(http.StatusInternalServerError)

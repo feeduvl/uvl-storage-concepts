@@ -355,3 +355,16 @@ func MongoGetAllLabeledTweets(mongoClient *mgo.Session) []TweetLabel {
 
 	return labeledTweets
 }
+
+// MongoUpdateTweetTopics returns ok whether the topics were be updated
+func MongoUpdateTweetTopics(mongoClient *mgo.Session, tweet Tweet) bool {
+	query := bson.M{"status_id": tweet.StatusID}
+	update := bson.M{"$set": bson.M{"topics": tweet.Topics}}
+	_, err := mongoClient.DB(database).C(collectionTweet).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return false
+	}
+
+	return true
+}
