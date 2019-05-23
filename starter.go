@@ -50,7 +50,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/access_key", getAccessKeyConfiguration).Methods("GET")
+	router.HandleFunc("/hitec/repository/twitter/access_key", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
@@ -381,7 +381,7 @@ func deleteObservableTwitter(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
+func postAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
 	var accessKey AccessKey
 	err := json.NewDecoder(r.Body).Decode(&accessKey)
 	if err != nil {
