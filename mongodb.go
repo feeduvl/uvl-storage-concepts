@@ -398,3 +398,19 @@ func MongoGetAccessKeyExists(mongoClient *mgo.Session, accessKey AccessKey) bool
 
 	return count > 0
 }
+
+// MongoGetAccessKeyConfiguration returns true if the key is in the database
+func MongoGetAccessKeyConfiguration(mongoClient *mgo.Session, accessKey AccessKey) AccessKeyConfiguration {
+	var accessKeyDB AccessKey
+	err := mongoClient.
+		DB(database).
+		C(collectionAccessKeys).
+		Find(bson.M{"access_key": accessKey.Key}).
+		One(&accessKeyDB)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return accessKeyDB.Configuration
+}

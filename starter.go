@@ -50,6 +50,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
+	router.HandleFunc("/hitec/repository/twitter/access_key", getAccessKeyConfiguration).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
@@ -377,5 +378,28 @@ func deleteObservableTwitter(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "could not delete observable", Status: false})
+	}
+}
+
+func getAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
+	var accessKey AccessKey
+	err := json.NewDecoder(r.Body).Decode(&accessKey)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	m := mongoClient.Copy()
+	defer m.Close()
+
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	accessKeyExists := MongoGetAccessKeyExists(m, accessKey)
+	if !accessKeyExists {
+		w.WriteHeader(http.StatusBadRequest)
+	} else {
+		accessKeyConfiguration := MongoGetAccessKeyConfiguration(m, accessKey)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(accessKeyConfiguration)
 	}
 }

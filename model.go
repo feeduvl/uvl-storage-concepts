@@ -82,5 +82,11 @@ func (observable *ObservableTwitter) validate() error {
 }
 
 type AccessKey struct {
-	Key string `validate:"nonzero" json:"access_key" bson:"access_key"`
+	Key           string                 `validate:"nonzero" json:"access_key" bson:"access_key"`
+	Configuration AccessKeyConfiguration `json:"configuration" bson:"configuration"`
+}
+
+type AccessKeyConfiguration struct {
+	TwitterAccounts         []string `json:"twitter_accounts" bson:"twitter_accounts"`
+	GooglePlayStoreAccounts []string `json:"google_play_store_accounts" bson:"google_play_store_accounts"`
 }
