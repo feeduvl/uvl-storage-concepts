@@ -80,3 +80,7 @@ type ObservableTwitter struct {
 func (observable *ObservableTwitter) validate() error {
 	return validator.Validate(observable)
 }
+
+type AccessKey struct {
+	Key string `validate:"nonzero" json:"access_key" bson:"access_key"`
+}

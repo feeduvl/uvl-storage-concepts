@@ -15,6 +15,7 @@ const (
 	collectionTwitterProfile    = "twitter_profile"
 	collectionObservableTwitter = "observable_twitter"
 	collectionTweetLabel        = "tweet_label"
+	collectionAccessKeys        = "access_keys"
 
 	fieldInReplyToScreenName = "in_reply_to_screen_name"
 	fieldStatusId            = "status_id"
@@ -28,6 +29,7 @@ const (
 	fieldTweetClass          = "tweet_class"
 	fieldClassifierCertainty = "classifier_certainty"
 	fieldIsAnnotated         = "is_annotated"
+	fieldAccessKey           = "access_key"
 )
 
 // MongoGetSession returns a session
@@ -111,6 +113,19 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	}
 	tweetLabelCollection := mongoClient.DB(database).C(collectionTweetLabel)
 	err = tweetLabelCollection.EnsureIndex(tweetLabelIndex)
+	if err != nil {
+		panic(err)
+	}
+
+	// Index
+	accessKeysIndex := mgo.Index{
+		Key:        []string{fieldAccessKey},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	accessKeysCollection := mongoClient.DB(database).C(collectionAccessKeys)
+	err = accessKeysCollection.EnsureIndex(accessKeysIndex)
 	if err != nil {
 		panic(err)
 	}
@@ -367,4 +382,19 @@ func MongoUpdateTweetTopics(mongoClient *mgo.Session, tweet Tweet) bool {
 	}
 
 	return true
+}
+
+// MongoGetAccessKeyExists returns true if the key is in the database
+func MongoGetAccessKeyExists(mongoClient *mgo.Session, accessKey AccessKey) bool {
+	count, err := mongoClient.
+		DB(database).
+		C(collectionObservableTwitter).
+		Find(bson.M{"access_key": accessKey.Key}).
+		Count()
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return count > 0
 }
