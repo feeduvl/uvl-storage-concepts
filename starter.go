@@ -50,7 +50,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/access_key", postAccessKeyConfiguration).Methods("POST")
+	router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
