@@ -388,7 +388,7 @@ func MongoUpdateTweetTopics(mongoClient *mgo.Session, tweet Tweet) bool {
 func MongoGetAccessKeyExists(mongoClient *mgo.Session, accessKey AccessKey) bool {
 	count, err := mongoClient.
 		DB(database).
-		C(collectionObservableTwitter).
+		C(collectionAccessKeys).
 		Find(bson.M{"access_key": accessKey.Key}).
 		Count()
 	if err != nil {
