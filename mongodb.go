@@ -17,19 +17,20 @@ const (
 	collectionTweetLabel        = "tweet_label"
 	collectionAccessKeys        = "access_keys"
 
-	fieldInReplyToScreenName = "in_reply_to_screen_name"
-	fieldStatusId            = "status_id"
-	fieldAccountName         = "account_name"
-	fieldLang                = "lang"
-	fieldText                = "text"
-	fieldUserName            = "user_name"
-	fieldProfileName         = "profile_name"
-	fieldSentiment           = "sentiment"
-	fieldSentimentScore      = "sentiment_score"
-	fieldTweetClass          = "tweet_class"
-	fieldClassifierCertainty = "classifier_certainty"
-	fieldIsAnnotated         = "is_annotated"
-	fieldAccessKey           = "access_key"
+	fieldInReplyToScreenName    = "in_reply_to_screen_name"
+	fieldStatusId               = "status_id"
+	fieldAccountName            = "account_name"
+	fieldLang                   = "lang"
+	fieldText                   = "text"
+	fieldUserName               = "user_name"
+	fieldProfileName            = "profile_name"
+	fieldSentiment              = "sentiment"
+	fieldSentimentScore         = "sentiment_score"
+	fieldTweetClass             = "tweet_class"
+	fieldClassifierCertainty    = "classifier_certainty"
+	fieldIsAnnotated            = "is_annotated"
+	fieldAccessKey              = "access_key"
+	fieldAccessKeyConfiguration = "access_key.configuration"
 )
 
 // MongoGetSession returns a session
@@ -413,4 +414,18 @@ func MongoGetAccessKeyConfiguration(mongoClient *mgo.Session, accessKey AccessKe
 	}
 
 	return accessKeyDB.Configuration
+}
+
+// MongoUpdateAccessKeyConfiguration
+func MongoUpdateAccessKeyConfiguration(mongoClient *mgo.Session, accessKey AccessKey) {
+	query := bson.M{fieldStatusId: accessKey.Key}
+	update := bson.M{"$set": bson.M{
+		"configuration.twitter_accounts":           accessKey.Configuration.TwitterAccounts,
+		"configuration.google_play_store_accounts": accessKey.Configuration.GooglePlayStoreAccounts,
+		"configuration.topics":                     accessKey.Configuration.Topics,
+	}}
+	_, err := mongoClient.DB(database).C(collectionAccessKeys).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+	}
 }

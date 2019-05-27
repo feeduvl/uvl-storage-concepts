@@ -40,6 +40,7 @@ func main() {
 	router.HandleFunc("/hitec/repository/twitter/label/tweet/", postLabelTwitter).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/store/topics", postTweetTopics).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/access_key", postCheckAccessKey).Methods("POST")
+	router.HandleFunc("/hitec/repository/twitter/access_key/update", postUpdateAccessKeyConfiguration).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/class/{tweet_class}", getTweetOfClass).Methods("GET")
@@ -220,6 +221,27 @@ func postCheckAccessKey(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(ResponseMessage{Message: "access key status", Status: accessKeyExists})
+}
+
+func postUpdateAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
+	var accessKey AccessKey
+	err := json.NewDecoder(r.Body).Decode(&accessKey)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("REST call (postUpdateAccessKeyConfiguration) %s\n", accessKey)
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	MongoUpdateAccessKeyConfiguration(m, accessKey)
+
+	// send response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
 }
 
 func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
