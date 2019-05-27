@@ -89,4 +89,5 @@ type AccessKey struct {
 type AccessKeyConfiguration struct {
 	TwitterAccounts         []string `json:"twitter_accounts" bson:"twitter_accounts"`
 	GooglePlayStoreAccounts []string `json:"google_play_store_accounts" bson:"google_play_store_accounts"`
+	Topics                  []string `json:"topics" bson:"topics"`
 }
