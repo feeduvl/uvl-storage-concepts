@@ -418,7 +418,7 @@ func MongoGetAccessKeyConfiguration(mongoClient *mgo.Session, accessKey AccessKe
 
 // MongoUpdateAccessKeyConfiguration
 func MongoUpdateAccessKeyConfiguration(mongoClient *mgo.Session, accessKey AccessKey) {
-	query := bson.M{fieldStatusId: accessKey.Key}
+	query := bson.M{"access_key": accessKey.Key}
 	update := bson.M{"$set": bson.M{
 		"configuration.twitter_accounts":           accessKey.Configuration.TwitterAccounts,
 		"configuration.google_play_store_accounts": accessKey.Configuration.GooglePlayStoreAccounts,
