@@ -230,6 +230,11 @@ func TestPostTweet(t *testing.T) {
 	assertSuccess(t, ep.mustExecuteRequest(tweets))
 }
 
+func TestPostClassifiedTweet(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
+}
+
 func TestPostObservableTwitter(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/store/observable/"}
 
@@ -268,6 +273,22 @@ func TestPostLabelTwitter(t *testing.T) {
 	err := mongoClient.DB(database).C(collectionTweetLabel).Remove(tweetLabel)
 	assert.NoError(t, err, "Could not remove tweet label fro db")
 }
+
+func TestPostTweetTopics(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
+}
+
+func TestPostCheckAccessKey(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
+}
+
+func TestPostUpdateAccessKeyConfiguration(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
+}
+
 func TestGetTweetOfClass(t *testing.T) {
 	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/class/%s"}
 
@@ -327,6 +348,11 @@ func TestGetAllTweetsOfAccountForCurrentWeek(t *testing.T) {
 	assert.Len(t, content, 1)
 }
 
+func TestGetAllUnclassifiedTweetsOfAccount(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
+}
+
 func TestGetAllTwitterAccountNames(t *testing.T) {
 	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/all"}
 
@@ -355,6 +381,11 @@ func TestGetObservablesTwitter(t *testing.T) {
 	var content []TweetLabel
 	assertJsonDecodes(t, response, &content)
 	assert.Len(t, content, 1)
+}
+
+func TestPostAccessKeyConfiguration(t *testing.T) {
+	// TODO: Implement
+	t.Fatal("Test not implemented")
 }
 
 func TestDeleteObservableTwitter(t *testing.T) {
