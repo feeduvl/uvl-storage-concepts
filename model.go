@@ -4,22 +4,22 @@ import validator "gopkg.in/validator.v2"
 
 // Tweet model
 type Tweet struct {
-	CreatedAt           int         `validate:"nonzero" json:"created_at" bson:"created_at"`
-	CreatedAtFull       string      `json:"created_at_full" bson:"created_at_full"`
-	FavoriteCount       int         `json:"favorite_count" bson:"favorite_count"`
-	RetweetCount        int         `json:"retweet_count" bson:"retweet_count"`
-	Text                string      `validate:"nonzero" json:"text" bson:"text"`
-	StatusID            string      `validate:"nonzero" json:"status_id" bson:"status_id"`
-	UserName            string      `json:"user_name" bson:"user_name"`
-	InReplyToScreenName string      `json:"in_reply_to_screen_name" bson:"in_reply_to_screen_name"`
-	Hashtags            []string    `json:"hashtags" bson:"hashtags"`
-	Lang                string      `json:"lang" bson:"lang"`
-	Sentiment           string      `json:"sentiment" bson:"sentiment"`
-	SentimentScore      int         `json:"sentiment_score" bson:"sentiment_score"`
-	TweetClass          string      `json:"tweet_class" bson:"tweet_class"`
-	ClassifierCertainty int         `json:"classifier_certainty" bson:"classifier_certainty"`
-	Annotated           bool        `json:"is_annotated" bson:"is_annotated"`
-	Topics              TweetTopics `json:"topics" bson:"topics"`
+	CreatedAt           int              `validate:"nonzero" json:"created_at" bson:"created_at"`
+	CreatedAtFull       string           `json:"created_at_full" bson:"created_at_full"`
+	FavoriteCount       int              `json:"favorite_count" bson:"favorite_count"`
+	RetweetCount        int              `json:"retweet_count" bson:"retweet_count"`
+	Text                AnonymizedString `validate:"nonzero" json:"text" bson:"text"`
+	StatusID            string           `validate:"nonzero" json:"status_id" bson:"status_id"`
+	UserName            string           `json:"user_name" bson:"user_name"`
+	InReplyToScreenName string           `json:"in_reply_to_screen_name" bson:"in_reply_to_screen_name"`
+	Hashtags            []string         `json:"hashtags" bson:"hashtags"`
+	Lang                string           `json:"lang" bson:"lang"`
+	Sentiment           string           `json:"sentiment" bson:"sentiment"`
+	SentimentScore      int              `json:"sentiment_score" bson:"sentiment_score"`
+	TweetClass          string           `json:"tweet_class" bson:"tweet_class"`
+	ClassifierCertainty int              `json:"classifier_certainty" bson:"classifier_certainty"`
+	Annotated           bool             `json:"is_annotated" bson:"is_annotated"`
+	Topics              TweetTopics      `json:"topics" bson:"topics"`
 }
 
 func (tweet *Tweet) validate() error {
