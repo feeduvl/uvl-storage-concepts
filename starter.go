@@ -32,7 +32,15 @@ func main() {
 	allowedOrigins := handlers.AllowedOrigins([]string{"*"})
 	allowedMethods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"})
 
+	router := makeRouter()
+
+	fmt.Println("ri-storage-twitter MS running")
+	log.Fatal(http.ListenAndServe(":9682", handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(router)))
+}
+
+func makeRouter() *mux.Router {
 	router := mux.NewRouter()
+
 	// Insert
 	router.HandleFunc("/hitec/repository/twitter/store/tweet/", postTweet).Methods("POST")
 	router.HandleFunc("/hitec/repository/twitter/store/classified/tweet/", postClassifiedTweet).Methods("POST")
@@ -56,8 +64,7 @@ func main() {
 	// Delete
 	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
 
-	fmt.Println("ri-storage-twitter MS running")
-	log.Fatal(http.ListenAndServe(":9682", handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(router)))
+	return router
 }
 
 func postTweet(w http.ResponseWriter, r *http.Request) {

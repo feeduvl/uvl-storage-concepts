@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -43,21 +44,7 @@ func setup() {
 }
 
 func setupRouter() {
-	router = mux.NewRouter()
-	// Insert
-	router.HandleFunc("/hitec/repository/twitter/store/tweet/", postTweet).Methods("POST")
-	router.HandleFunc("/hitec/repository/twitter/store/observable/", postObservableTwitter).Methods("POST")
-	router.HandleFunc("/hitec/repository/twitter/label/tweet/", postLabelTwitter).Methods("POST")
-
-	// Get
-	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/class/{tweet_class}", getTweetOfClass).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all", getAllTweetsOfAccount).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all/unlabeled", getAllUnlabeledTweetsOfAccount).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/currentweek", getAllTweetsOfAccountForCurrentWeek).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/account_name/all", getAllTwitterAccountNames).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/labeledtweets/all", getAllLabeledTweets).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/observables", getObservablesTwitter).Methods("GET")
-	router.HandleFunc("/hitec/repository/twitter/observables", deleteObservableTwitter).Methods("DELETE")
+	router = makeRouter()
 }
 
 func setupDB() {
@@ -178,448 +165,216 @@ func tearDown() {
 	mockDBServer.Stop() // Stop shuts down the temporary server and removes data on disk.
 }
 
-func buildRequest(method, endpoint string, payload io.Reader, t *testing.T) *http.Request {
-	req, err := http.NewRequest(method, endpoint, payload)
-	if err != nil {
-		t.Errorf("An error occurred. %v", err)
-	}
-
-	return req
+type endpoint struct {
+	method string
+	url    string
 }
 
-func executeRequest(req *http.Request) *httptest.ResponseRecorder {
+func (e endpoint) withVars(vs ...interface{}) endpoint {
+	e.url = fmt.Sprintf(e.url, vs...)
+	return e
+}
+
+func (e endpoint) executeRequest(payload interface{}) (error, *httptest.ResponseRecorder) {
+	body := new(bytes.Buffer)
+	err := json.NewEncoder(body).Encode(payload)
+	if err != nil {
+		return err, nil
+	}
+
+	req, err := http.NewRequest(e.method, e.url, body)
+	if err != nil {
+		return err, nil
+	}
+
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
+
+	return nil, rr
+}
+
+func (e endpoint) mustExecuteRequest(payload interface{}) *httptest.ResponseRecorder {
+	err, rr := e.executeRequest(payload)
+	if err != nil {
+		panic(`Could not execute request`)
+	}
 
 	return rr
 }
 
-func TestPostTweet(t *testing.T) {
-	fmt.Println("start test TestPostTweet")
-	var method = "POST"
-	var endpoint = "/hitec/repository/twitter/store/tweet/"
+func isSuccess(code int) bool {
+	return code >= 200 && code < 300
+}
 
-	/*
-	 * test for faillure
-	 */
-	payload := new(bytes.Buffer)
-	err := json.NewEncoder(payload).Encode([]byte(`[{ "wrong_json_format": true }]`))
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
+func assertSuccess(t *testing.T, rr *httptest.ResponseRecorder) {
+	if !isSuccess(rr.Code) {
+		t.Errorf("Status code differs. Expected success.\n Got status %d (%s) instead", rr.Code, http.StatusText(rr.Code))
 	}
-
-	req := buildRequest(method, endpoint, payload, t)
-	rr := executeRequest(req)
-
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusBadRequest, status)
-	}
-
-	/*
-	 * test for success
-	 */
-	payload = new(bytes.Buffer)
-	err = json.NewEncoder(payload).Encode(tweets)
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req = buildRequest(method, endpoint, payload, t)
-	rr = executeRequest(req)
-
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
+}
+func assertFailure(t *testing.T, rr *httptest.ResponseRecorder) {
+	if isSuccess(rr.Code) {
+		t.Errorf("Status code differs. Expected failure.\n Got status %d (%s) instead", rr.Code, http.StatusText(rr.Code))
 	}
 }
 
-func TestPostObservableTwitter(t *testing.T) {
-	fmt.Println("start test TestPostObservableTwitter")
-	var method = "POST"
-	var endpoint = "/hitec/repository/twitter/store/observable/"
+func assertJsonDecodes(t *testing.T, rr *httptest.ResponseRecorder, v interface{}) {
+	err := json.Unmarshal(rr.Body.Bytes(), v)
+	if err != nil {
+		t.Error(errors.Wrap(err, "Expected valid json array"))
+	}
+}
 
-	/*
-	 * test for faillure
-	 */
-	payload := new(bytes.Buffer)
-	err := json.NewEncoder(payload).Encode(ObservableTwitter{
+func TestPostTweet(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/twitter/store/tweet/"}
+	assertFailure(t, ep.mustExecuteRequest([]byte(`[{ "wrong_json_format": true }]`)))
+	assertSuccess(t, ep.mustExecuteRequest(tweets))
+}
+
+func TestPostObservableTwitter(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/twitter/store/observable/"}
+
+	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(ObservableTwitter{
 		AccountName: "Test",
 		Interval:    "2h",
-	})
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req := buildRequest(method, endpoint, payload, t)
-	rr := executeRequest(req)
+	}))
 
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusBadRequest, status)
-	}
-
-	/*
-	 * test for success
-	 */
-	payload = new(bytes.Buffer)
-	correctlyFormattedObservable := ObservableTwitter{
+	// Test for success
+	correctObservable := ObservableTwitter{
 		AccountName: "Test",
 		Interval:    "2h",
 		Lang:        "en",
 	}
-	err = json.NewEncoder(payload).Encode(correctlyFormattedObservable)
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req = buildRequest(method, endpoint, payload, t)
-	rr = executeRequest(req)
+	assertSuccess(t, ep.mustExecuteRequest(correctObservable))
 
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	MongoDeleteObservableTwitter(mongoClient, correctlyFormattedObservable)
+	MongoDeleteObservableTwitter(mongoClient, correctObservable)
 }
 
 func TestPostLabelTwitter(t *testing.T) {
-	fmt.Println("start test TestPostLabelTwitter")
-	var method = "POST"
-	var endpoint = "/hitec/repository/twitter/label/tweet/"
+	ep := endpoint{"POST", "/hitec/repository/twitter/label/tweet/"}
 
-	/*
-	 * test for faillure
-	 */
-	payload := new(bytes.Buffer)
-	err := json.NewEncoder(payload).Encode(TweetLabel{})
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req := buildRequest(method, endpoint, payload, t)
-	rr := executeRequest(req)
+	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(TweetLabel{}))
 
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusBadRequest, status)
-	}
-
-	/*
-	 * test for success
-	 */
-	payload = new(bytes.Buffer)
+	// Test for success
 	tweetLabel := TweetLabel{
 		Date:          20190131,
 		Label:         "problem_report",
 		PreviousLabel: "problem_report",
 		StatusID:      "1234",
 	}
-	err = json.NewEncoder(payload).Encode(tweetLabel)
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req = buildRequest(method, endpoint, payload, t)
-	rr = executeRequest(req)
+	assertSuccess(t, ep.mustExecuteRequest(tweetLabel))
 
-	//Confirm the response has the right status code
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	err = mongoClient.DB(database).C(collectionTweetLabel).Remove(tweetLabel)
-	if err != nil {
-		t.Errorf("Could not remove tweet label fro db")
-	}
+	err := mongoClient.DB(database).C(collectionTweetLabel).Remove(tweetLabel)
+	assert.NoError(t, err, "Could not remove tweet label fro db")
 }
 func TestGetTweetOfClass(t *testing.T) {
-	fmt.Println("start test TestGetTweetOfClass")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/account_name/%s/class/%s"
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/class/%s"}
 
-	/*
-	 * test for faillure
-	 */
-	endpointFail := fmt.Sprintf(endpoint, "should", "fail")
-	req := buildRequest(method, endpointFail, nil, t)
-	rr := executeRequest(req)
+	// Test for failure
+	response := ep.withVars("should", "fail").mustExecuteRequest(nil)
+	var content []Tweet
+	assertJsonDecodes(t, response, &content)
+	assert.Empty(t, content)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsResponse []Tweet
-	err := json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 0 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 0, len(tweetsResponse))
-	}
-
-	/*
-	 * test for success
-	 */
-	endpointSuccess := fmt.Sprintf(endpoint, "WindItalia", "problem_report")
-	req = buildRequest(method, endpointSuccess, nil, t)
-	rr = executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	err = json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 1 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 1, len(tweetsResponse))
-	}
+	// Test for success
+	response = ep.withVars("WindItalia", "problem_report").mustExecuteRequest(nil)
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 1)
 }
 
 func TestGetAllTweetsOfAccount(t *testing.T) {
-	fmt.Println("start test TestGetAllTweetsOfAccount")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/account_name/%s/all"
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/all"}
 
-	/*
-	 * test for faillure
-	 */
-	endpointFail := fmt.Sprintf(endpoint, "shouldfail")
-	req := buildRequest(method, endpointFail, nil, t)
-	rr := executeRequest(req)
+	// Test for failure
+	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
+	var content []Tweet
+	assertJsonDecodes(t, response, &content)
+	assert.Empty(t, content)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsResponse []Tweet
-	err := json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 0 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 0, len(tweetsResponse))
-	}
-
-	/*
-	 * test for success
-	 */
-	endpointSuccess := fmt.Sprintf(endpoint, "Tre_It")
-	req = buildRequest(method, endpointSuccess, nil, t)
-	rr = executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	err = json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 3 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 3, len(tweetsResponse))
-	}
+	// Test for success
+	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 3)
 }
 
 func TestGetAllUnlabeledTweetsOfAccount(t *testing.T) {
-	fmt.Println("start test TestGetAllUnlabeledTweetsOfAccount")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/account_name/%s/all/unlabeled"
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/all/unlabeled"}
 
-	/*
-	 * test for faillure
-	 */
-	endpointFail := fmt.Sprintf(endpoint, "shouldfail")
-	req := buildRequest(method, endpointFail, nil, t)
-	rr := executeRequest(req)
+	// Test for failure
+	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
+	assertFailure(t, response)
 
-	if status := rr.Code; status != http.StatusBadRequest {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusBadRequest, status)
-	}
-
-	/*
-	 * test for success
-	 */
-	endpointSuccess := fmt.Sprintf(endpoint, "Tre_It")
-	req = buildRequest(method, endpointSuccess, nil, t)
-	rr = executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsResponse []Tweet
-	err := json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 2 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 2, len(tweetsResponse))
-	}
+	// Test for success
+	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
+	var content []Tweet
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 2)
 }
 
 func TestGetAllTweetsOfAccountForCurrentWeek(t *testing.T) {
-	fmt.Println("start test TestGetAllTweetsOfAccount")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/account_name/%s/currentweek"
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/currentweek"}
 
-	/*
-	 * test for faillure
-	 */
-	endpointFail := fmt.Sprintf(endpoint, "shouldfail")
-	req := buildRequest(method, endpointFail, nil, t)
-	rr := executeRequest(req)
+	// Test for failure
+	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
+	var content []Tweet
+	assertJsonDecodes(t, response, &content)
+	assert.Empty(t, content)
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsResponse []Tweet
-	err := json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 0 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 0, len(tweetsResponse))
-	}
-
-	/*
-	 * test for success
-	 */
-	endpointSuccess := fmt.Sprintf(endpoint, "Tre_It")
-	req = buildRequest(method, endpointSuccess, nil, t)
-	rr = executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	err = json.NewDecoder(rr.Body).Decode(&tweetsResponse)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsResponse) != 1 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 1, len(tweetsResponse))
-	}
+	// Test for success
+	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 1)
 }
 
 func TestGetAllTwitterAccountNames(t *testing.T) {
-	fmt.Println("start test TestGetAllTwitterAccountNames")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/account_name/all"
-	/*
-	 * test for success
-	 */
-	req := buildRequest(method, endpoint, nil, t)
-	rr := executeRequest(req)
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/all"}
 
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var TwitterAccount TwitterAccount
-	err := json.NewDecoder(rr.Body).Decode(&TwitterAccount)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(TwitterAccount.Names) != 2 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 2, len(TwitterAccount.Names))
-	}
+	// Test for success
+	response := ep.mustExecuteRequest(nil)
+	var content TwitterAccount
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content.Names, 2)
 }
 
 func TestGetAllLabeledTweets(t *testing.T) {
-	fmt.Println("start test TestGetAllLabeledTweets")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/labeledtweets/all"
+	ep := endpoint{"GET", "/hitec/repository/twitter/labeledtweets/all"}
 
-	/*
-	 * test for faillure
-	 */
-	req := buildRequest(method, endpoint, nil, t)
-	rr := executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsLabeled []TweetLabel
-	err := json.NewDecoder(rr.Body).Decode(&tweetsLabeled)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsLabeled) != 1 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 1, len(tweetsLabeled))
-	}
+	// Test for success
+	response := ep.mustExecuteRequest(nil)
+	var content []TweetLabel
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 1)
 }
 
 func TestGetObservablesTwitter(t *testing.T) {
-	fmt.Println("start test TestGetObservablesTwitter")
-	var method = "GET"
-	var endpoint = "/hitec/repository/twitter/observables"
+	ep := endpoint{"GET", "/hitec/repository/twitter/observables"}
 
-	/*
-	 * test for Success
-	 */
-	req := buildRequest(method, endpoint, nil, t)
-	rr := executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
-
-	var tweetsLabeled []TweetLabel
-	err := json.NewDecoder(rr.Body).Decode(&tweetsLabeled)
-	if err != nil {
-		t.Errorf("Did not receive a proper formed json")
-	}
-	if len(tweetsLabeled) != 1 {
-		t.Errorf("response length differs. Expected %d .\n Got %d instead", 1, len(tweetsLabeled))
-	}
+	// Test for success
+	response := ep.mustExecuteRequest(nil)
+	var content []TweetLabel
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 1)
 }
 
-func TestDeleteObservablesTwitter(t *testing.T) {
-	fmt.Println("start test TestDeleteObservablesTwitter")
-	var method = "DELETE"
-	var endpoint = "/hitec/repository/twitter/observables"
+func TestDeleteObservableTwitter(t *testing.T) {
+	ep := endpoint{"DELETE", "/hitec/repository/twitter/observables"}
 
-	/*
-	 * test for Faillure
-	 */
-	payload := new(bytes.Buffer)
-	err := json.NewEncoder(payload).Encode(ObservableTwitter{
+	// Test for failure
+	ep.mustExecuteRequest(ObservableTwitter{
 		AccountName: "Test",
 		Interval:    "2h",
 	})
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req := buildRequest(method, endpoint, payload, t)
-	_ = executeRequest(req)
-
 	observables := MongoGetAllObservableTwitter(mongoClient)
-	if len(observables) != 1 {
-		t.Errorf("Number of observables differ. Expected %d .\n Got %d instead", len(observables), 1)
-	}
+	assert.Len(t, observables, 1)
 
-	/*
-	 * test for Success
-	 */
-	payload = new(bytes.Buffer)
-	err = json.NewEncoder(payload).Encode(ObservableTwitter{
+	// Test for success
+	assertSuccess(t, ep.mustExecuteRequest(ObservableTwitter{
 		AccountName: "TestObserverable",
 		Interval:    "2h",
 		Lang:        "en",
-	})
-	if err != nil {
-		t.Errorf("Could not convert example tweet to json byte")
-	}
-	req = buildRequest(method, endpoint, payload, t)
-	rr := executeRequest(req)
-
-	if status := rr.Code; status != http.StatusOK {
-		t.Errorf("Status code differs. Expected %d .\n Got %d instead", http.StatusOK, status)
-	}
+	}))
 
 	observables = MongoGetAllObservableTwitter(mongoClient)
-	if len(observables) != 0 {
-		t.Errorf("Number of observables differ. Expected %d .\n Got %d instead", len(observables), 0)
-	}
+	assert.Empty(t, observables)
 }
