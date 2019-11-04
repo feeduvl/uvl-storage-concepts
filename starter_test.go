@@ -22,6 +22,7 @@ import (
 var router *mux.Router
 var mockDBServer dbtest.DBServer
 var tweets []Tweet
+var invalidTweet Tweet
 var existingAccessKey AccessKey
 var notExistingAccessKey AccessKey
 var invalidArrayPayload []byte
@@ -139,6 +140,7 @@ func fillDB() {
 		panic(err)
 	}
 
+	invalidTweet = Tweet{}
 	invalidArrayPayload = []byte(`[{ "wrong_json_format": true }]`)
 	invalidObjectPayload = []byte(`{ "wrong_json_format": true }`)
 
@@ -259,12 +261,14 @@ func assertJsonDecodes(t *testing.T, rr *httptest.ResponseRecorder, v interface{
 func TestPostTweet(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/store/tweet/"}
 	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
+	assertFailure(t, ep.mustExecuteRequest(invalidTweet))
 	assertSuccess(t, ep.mustExecuteRequest(tweets))
 }
 
 func TestPostClassifiedTweet(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/store/classified/tweet/"}
 	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
+	assertFailure(t, ep.mustExecuteRequest(invalidTweet))
 
 	tweet := tweets[0]
 	tweet.TweetClass = "problem_report"
@@ -278,6 +282,7 @@ func TestPostObservableTwitter(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/store/observable/"}
 
 	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
 	assertFailure(t, ep.mustExecuteRequest(ObservableTwitter{
 		AccountName: "Test",
 		Interval:    "2h",
@@ -298,6 +303,7 @@ func TestPostLabelTwitter(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/label/tweet/"}
 
 	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
 	assertFailure(t, ep.mustExecuteRequest(TweetLabel{}))
 
 	// Test for success
@@ -481,6 +487,7 @@ func TestDeleteObservableTwitter(t *testing.T) {
 	ep := endpoint{"DELETE", "/hitec/repository/twitter/observables"}
 
 	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
 	ep.mustExecuteRequest(ObservableTwitter{
 		AccountName: "Test",
 		Interval:    "2h",

@@ -98,7 +98,7 @@ github.com/OpenReqEU/ri-storage-twitter/starter.go:121.68,124.16 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:130.2,131.16 2 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:137.2,145.8 5 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:150.2,150.52 1 1
-github.com/OpenReqEU/ri-storage-twitter/starter.go:124.16,128.3 3 0
+github.com/OpenReqEU/ri-storage-twitter/starter.go:124.16,128.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:131.16,135.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:145.8,147.3 1 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:147.8,149.3 1 0
@@ -106,7 +106,7 @@ github.com/OpenReqEU/ri-storage-twitter/starter.go:153.63,156.16 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:162.2,163.16 2 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:168.2,178.29 6 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:183.2,183.52 1 1
-github.com/OpenReqEU/ri-storage-twitter/starter.go:156.16,160.3 3 0
+github.com/OpenReqEU/ri-storage-twitter/starter.go:156.16,160.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:163.16,167.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:178.29,180.3 1 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:180.8,182.3 1 0
@@ -134,7 +134,7 @@ github.com/OpenReqEU/ri-storage-twitter/starter.go:365.66,374.2 6 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:376.68,385.2 6 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:387.70,390.16 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:395.2,403.8 6 1
-github.com/OpenReqEU/ri-storage-twitter/starter.go:390.16,394.3 3 0
+github.com/OpenReqEU/ri-storage-twitter/starter.go:390.16,394.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:403.8,407.3 3 1
 github.com/OpenReqEU/ri-storage-twitter/starter.go:407.8,410.3 2 0
 github.com/OpenReqEU/ri-storage-twitter/starter.go:413.73,416.16 3 1
