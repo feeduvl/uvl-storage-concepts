@@ -59,15 +59,14 @@ type TwitterAccount struct {
 	Names []string `json:"twitter_account_names" bson:"twitter_account_names"`
 }
 
+type TweetClass struct {
+	Label string  `json:"label" bson:"label"`
+	Score float64 `json:"score" bson:"score"`
+}
+
 type TweetTopics struct {
-	FirstClass struct {
-		Label string  `json:"label" bson:"label"`
-		Score float64 `json:"score" bson:"score"`
-	} `json:"first_class" bson:"first_class"`
-	SecondClass struct {
-		Label string  `json:"label" bson:"label"`
-		Score float64 `json:"score" bson:"score"`
-	} `json:"second_class" bson:"second_class"`
+	FirstClass  TweetClass `json:"first_class" bson:"first_class"`
+	SecondClass TweetClass `json:"second_class" bson:"second_class"`
 }
 
 // ObservableTwitter model
