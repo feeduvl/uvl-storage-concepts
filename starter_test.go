@@ -21,7 +21,11 @@ import (
 
 var router *mux.Router
 var mockDBServer dbtest.DBServer
-var tweets []interface{}
+var tweets []Tweet
+var existingAccessKey AccessKey
+var notExistingAccessKey AccessKey
+var invalidArrayPayload []byte
+var invalidObjectPayload []byte
 
 func TestMain(m *testing.M) {
 	fmt.Println("--- Start Tests")
@@ -105,7 +109,7 @@ func fillDB() {
 		Lang:                "it",
 		Sentiment:           "NEUTRAL",
 		SentimentScore:      0,
-		TweetClass:          "inquiry",
+		TweetClass:          "",
 		ClassifierCertainty: 0,
 	})
 	dateOfCurrentWeek, _ := strconv.Atoi(time.Now().AddDate(0, 0, -5).Format("20060102"))
@@ -127,8 +131,36 @@ func fillDB() {
 	})
 
 	tweetBulk := mongoClient.DB(database).C(collectionTweet).Bulk()
-	tweetBulk.Insert(tweets...)
+	for _, tweet := range tweets {
+		tweetBulk.Insert(tweet)
+	}
 	_, err := tweetBulk.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	invalidArrayPayload = []byte(`[{ "wrong_json_format": true }]`)
+	invalidObjectPayload = []byte(`{ "wrong_json_format": true }`)
+
+	notExistingAccessKey = AccessKey{
+		Key: "notindb",
+		Configuration: AccessKeyConfiguration{
+			TwitterAccounts:         []string{"Tre_It"},
+			GooglePlayStoreAccounts: []string{},
+			Topics:                  []string{"Network"},
+		},
+	}
+
+	existingAccessKey = AccessKey{
+		Key: "indb",
+		Configuration: AccessKeyConfiguration{
+			TwitterAccounts:         []string{"Tre_It"},
+			GooglePlayStoreAccounts: []string{"Wind Tre S.p.A."},
+			Topics:                  []string{"Contract", "Devices"},
+		},
+	}
+
+	err = mongoClient.DB(database).C(collectionAccessKeys).Insert(existingAccessKey)
 	if err != nil {
 		panic(err)
 	}
@@ -196,7 +228,7 @@ func (e endpoint) executeRequest(payload interface{}) (error, *httptest.Response
 func (e endpoint) mustExecuteRequest(payload interface{}) *httptest.ResponseRecorder {
 	err, rr := e.executeRequest(payload)
 	if err != nil {
-		panic(`Could not execute request`)
+		panic(errors.Wrap(err, `Could not execute request`))
 	}
 
 	return rr
@@ -226,13 +258,20 @@ func assertJsonDecodes(t *testing.T, rr *httptest.ResponseRecorder, v interface{
 
 func TestPostTweet(t *testing.T) {
 	ep := endpoint{"POST", "/hitec/repository/twitter/store/tweet/"}
-	assertFailure(t, ep.mustExecuteRequest([]byte(`[{ "wrong_json_format": true }]`)))
+	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
 	assertSuccess(t, ep.mustExecuteRequest(tweets))
 }
 
 func TestPostClassifiedTweet(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"POST", "/hitec/repository/twitter/store/classified/tweet/"}
+	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
+
+	tweet := tweets[0]
+	tweet.TweetClass = "problem_report"
+	tweet.ClassifierCertainty = 80 // TODO
+	tweet.Sentiment = "NEGATIVE"
+	tweet.SentimentScore = -2
+	assertSuccess(t, ep.mustExecuteRequest([]Tweet{tweet}))
 }
 
 func TestPostObservableTwitter(t *testing.T) {
@@ -275,18 +314,53 @@ func TestPostLabelTwitter(t *testing.T) {
 }
 
 func TestPostTweetTopics(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"POST", "/hitec/repository/twitter/store/topics"}
+
+	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+
+	// Test for success
+	tweet := tweets[0]
+	tweet.Topics = TweetTopics{
+		FirstClass: TweetClass{
+			Label: "Network",
+			Score: 0.3,
+		},
+		SecondClass: TweetClass{
+			Label: "Devices",
+			Score: 0.6,
+		},
+	}
+	assertSuccess(t, ep.mustExecuteRequest(tweet))
 }
 
 func TestPostCheckAccessKey(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"POST", "/hitec/repository/twitter/access_key"}
+
+	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+
+	// Test for success
+	response := ep.mustExecuteRequest(existingAccessKey)
+	var message ResponseMessage
+	assertJsonDecodes(t, response, &message)
+	assert.True(t, message.Status)
+
+	response = ep.mustExecuteRequest(notExistingAccessKey)
+	assertJsonDecodes(t, response, &message)
+	assert.False(t, message.Status)
 }
 
 func TestPostUpdateAccessKeyConfiguration(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"POST", "/hitec/repository/twitter/access_key/update"}
+
+	// Test for failure
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+
+	// Test for success
+	key := existingAccessKey
+	key.Configuration.Topics = []string{"Contract", "Network"}
+	assertSuccess(t, ep.mustExecuteRequest(key))
 }
 
 func TestGetTweetOfClass(t *testing.T) {
@@ -349,8 +423,13 @@ func TestGetAllTweetsOfAccountForCurrentWeek(t *testing.T) {
 }
 
 func TestGetAllUnclassifiedTweetsOfAccount(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/lang/%s/unclassified"}
+
+	// Test for success
+	response := ep.withVars("Tre_It", "it").mustExecuteRequest(nil)
+	var tweets []Tweet
+	assertJsonDecodes(t, response, &tweets)
+	assert.Len(t, tweets, 1)
 }
 
 func TestGetAllTwitterAccountNames(t *testing.T) {
@@ -384,8 +463,18 @@ func TestGetObservablesTwitter(t *testing.T) {
 }
 
 func TestPostAccessKeyConfiguration(t *testing.T) {
-	// TODO: Implement
-	t.Fatal("Test not implemented")
+	ep := endpoint{"POST", "/hitec/repository/twitter/access_key/configuration"}
+	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+
+	notExistingKeyBody := map[string]string{"access_key": notExistingAccessKey.Key}
+	assertFailure(t, ep.mustExecuteRequest(notExistingKeyBody))
+
+	existingKeyBody := map[string]string{"access_key": existingAccessKey.Key}
+	assertSuccess(t, ep.mustExecuteRequest(existingKeyBody))
+	response := ep.mustExecuteRequest(existingKeyBody)
+	assertSuccess(t, response)
+	var config AccessKeyConfiguration
+	assertJsonDecodes(t, response, &config)
 }
 
 func TestDeleteObservableTwitter(t *testing.T) {
