@@ -180,6 +180,23 @@ func MongoGetTweetOfClass(mongoClient *mgo.Session, tweetedToName string, tweetC
 	return tweets
 }
 
+// MongoGetTweetOfClass returns all tweets belonging to one class i.e., issue report of a specific twitter page
+func MongoGetTweetOfClassLimited(mongoClient *mgo.Session, tweetedToName string, tweetClass string, limit int) []Tweet {
+	var tweets []Tweet
+	err := mongoClient.
+		DB(database).
+		C(collectionTweet).
+		Find(bson.M{fieldInReplyToScreenName: tweetedToName, fieldTweetClass: tweetClass}).
+		Limit(limit).
+		All(&tweets)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return tweets
+}
+
 // MongoGetAllTweetsOfAccountName returns all tweets belonging to one specific twitter page
 func MongoGetAllTweetsOfAccountName(mongoClient *mgo.Session, accountName string) []Tweet {
 	var tweets []Tweet

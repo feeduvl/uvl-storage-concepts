@@ -52,6 +52,7 @@ func makeRouter() *mux.Router {
 
 	// Get
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/class/{tweet_class}", getTweetOfClass).Methods("GET")
+	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/class/{tweet_class}/limit/{limit}", getTweetOfClassLimited).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all", getAllTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/all/unlabeled", getAllUnlabeledTweetsOfAccount).Methods("GET")
 	router.HandleFunc("/hitec/repository/twitter/account_name/{account_name}/currentweek", getAllTweetsOfAccountForCurrentWeek).Methods("GET")
@@ -262,6 +263,30 @@ func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	tweets := MongoGetTweetOfClass(m, tweetedToName, tweetClass)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tweets)
+}
+
+func getTweetOfClassLimited(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	tweetedToName := params["account_name"]
+	tweetClass := params["tweet_class"]
+	limitParam := params["limit"]
+	limit, err := strconv.Atoi(limitParam)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("params: ", tweetedToName, tweetClass)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	tweets := MongoGetTweetOfClassLimited(m, tweetedToName, tweetClass, limit)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
