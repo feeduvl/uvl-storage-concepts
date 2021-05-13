@@ -1,6 +1,29 @@
 package main
 
-import validator "gopkg.in/validator.v2"
+import (
+	"crypto/x509/pkix"
+	"encoding"
+	validator "gopkg.in/validator.v2"
+)
+
+// Dataset model
+type Dataset struct {
+	UploadedAt int        `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
+	Content    []Document `json:"content" bson:"content"`
+	Name       text       `validate:"nonzero" json:"name" bson:"name"`
+}
+
+// Document model
+type Document struct {
+	// number??
+	Text string `validate:"nonzero" json:"text" bson:"text"`
+}
+
+// DetectionResult model
+type DetectionResult struct {
+	// concepts
+	//
+}
 
 // Tweet model
 type Tweet struct {

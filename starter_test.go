@@ -28,6 +28,7 @@ var notExistingAccessKey AccessKey
 var invalidArrayPayload []byte
 var invalidObjectPayload []byte
 
+/*
 func TestMain(m *testing.M) {
 	fmt.Println("--- Start Tests")
 	setup()
@@ -39,7 +40,7 @@ func TestMain(m *testing.M) {
 
 	// call with result of m.Run()
 	os.Exit(retCode)
-}
+}*/
 
 func setup() {
 	fmt.Println("--- --- setup")

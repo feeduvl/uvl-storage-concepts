@@ -30,6 +30,9 @@ const (
 	fieldClassifierCertainty = "classifier_certainty"
 	fieldIsAnnotated         = "is_annotated"
 	fieldAccessKey           = "access_key"
+
+	collectionDataset = "dataset"
+	fieldDatasetName  = "name"
 )
 
 // MongoGetSession returns a session
@@ -129,6 +132,29 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// MongoInsertDataset returns of if the dataset was inserted or already existed
+func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+	query := bson.M{fieldDatasetName: dataset.Name}
+	update := bson.M{"$set": dataset}
+	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return false
+	}
+
+	return true
+}
+
+// MongoDeleteDataset return of if db entry could be deleted
+func MongoDeleteDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		RemoveAll(bson.M{fieldDatasetName: dataset.Name})
+
+	return err == nil
 }
 
 // MongoInsertTweets returns ok if the tweet was inserted or already existed
