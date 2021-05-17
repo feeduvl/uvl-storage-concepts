@@ -48,8 +48,10 @@ func makeRouter() *mux.Router {
 	//router.HandleFunc("/hitec/repository/twitter/access_key/update", postUpdateAccessKeyConfiguration).Methods("POST")
 
 	// Get
-	router.HandleFunc("/hitec/repository/concepts/dataset", getDataset).Methods("GET")
-	router.HandleFunc("/hitec/repository/concepts/detection/result", getDetectionResult).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/dataset/{dataset}", getDataset).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", getDetectionResult).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 	//router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
@@ -93,7 +95,15 @@ func getDataset() {
 	//
 }
 
+func getAllDatasets() {
+	//
+}
+
 func getDetectionResult() {
+	//
+}
+
+func getAllDetectionResults() {
 	//
 }
 
