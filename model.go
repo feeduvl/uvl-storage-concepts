@@ -10,7 +10,7 @@ import (
 type Dataset struct {
 	UploadedAt int        `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
 	Content    []Document `json:"content" bson:"content"`
-	Name       text       `validate:"nonzero" json:"name" bson:"name"`
+	Name       string     `validate:"nonzero" json:"name" bson:"name"`
 }
 
 // Document model

@@ -1,16 +1,11 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
-
-	"gopkg.in/mgo.v2"
-
-	"encoding/json"
-	"fmt"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -35,7 +30,7 @@ func main() {
 	router := makeRouter()
 
 	fmt.Println("uvl-storage-concepts MS running")
-	log.Fatal(http.ListenAndServe(":9682", handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(router)))
+	log.Fatal(http.ListenAndServe(":9684", handlers.CORS(allowedHeaders, allowedOrigins, allowedMethods)(router)))
 }
 
 func makeRouter() *mux.Router {
