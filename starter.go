@@ -120,7 +120,18 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllDatasets(w http.ResponseWriter, r *http.Request) {
-	//
+
+	fmt.Printf("REST call: getAllDatasets")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	datasets := MongoGetAllDatasets(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(datasets)
 
 }
 

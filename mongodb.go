@@ -108,6 +108,29 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 	return dataset
 }
 
+// MongoGetAllDatasets returns a dataset
+func MongoGetAllDatasets(mongoClient *mgo.Session) string {
+
+	job := &mgo.MapReduce{
+		Map:    "function() { for (var key in this) { emit(key, null); } }",
+		Reduce: "function(key, stuff) { return null; }",
+		Out:    "datasetNames" + "_keys",
+	}
+
+	datasetNames, err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		Find(nil).
+		MapReduce(job, nil)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return datasetNames.Collection
+}
+
 /*
 // MongoCreateCollectionIndexes creates the indexes
 func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
