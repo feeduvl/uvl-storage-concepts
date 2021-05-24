@@ -10,29 +10,12 @@ import (
 )
 
 const (
-	database                    = "twitter_data"
-	collectionTweet             = "tweet"
-	collectionTwitterProfile    = "twitter_profile"
-	collectionObservableTwitter = "observable_twitter"
-	collectionTweetLabel        = "tweet_label"
-	collectionAccessKeys        = "access_keys"
-
-	fieldInReplyToScreenName = "in_reply_to_screen_name"
-	fieldStatusId            = "status_id"
-	fieldAccountName         = "account_name"
-	fieldLang                = "lang"
-	fieldText                = "text"
-	fieldUserName            = "user_name"
-	fieldProfileName         = "profile_name"
-	fieldSentiment           = "sentiment"
-	fieldSentimentScore      = "sentiment_score"
-	fieldTweetClass          = "tweet_class"
-	fieldClassifierCertainty = "classifier_certainty"
-	fieldIsAnnotated         = "is_annotated"
-	fieldAccessKey           = "access_key"
-
+	database          = "concepts_data"
 	collectionDataset = "dataset"
-	fieldDatasetName  = "name"
+	collectionResult  = "result"
+
+	fieldDatasetName       = "name"
+	fieldDatasetUploadedAt = "uploaded_at"
 )
 
 // MongoGetSession returns a session
@@ -55,6 +38,77 @@ func MongoGetSession(mongoIP, username, password string) *mgo.Session {
 	return session
 }
 
+// MongoCreateCollectionIndexes creates the indexes
+func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
+	// Index
+	datasetIndex := mgo.Index{
+		Key:        []string{fieldDatasetName},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	datasetCollection := mongoClient.DB(database).C(collectionDataset)
+	err := datasetCollection.EnsureIndex(datasetIndex)
+	if err != nil {
+		panic(err)
+	}
+	// Index
+	datasetSecondIndex := mgo.Index{
+		Key:        []string{fieldDatasetName, fieldDatasetUploadedAt},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	err = datasetCollection.EnsureIndex(datasetSecondIndex)
+	if err != nil {
+		panic(err)
+	}
+
+	// Index
+	// Result etc.
+
+}
+
+// MongoInsertDataset returns ok if the dataset was inserted or already existed
+func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+	query := bson.M{fieldDatasetName: dataset.Name}
+	update := bson.M{"$set": dataset}
+	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return false
+	}
+
+	return true
+}
+
+// MongoDeleteDataset return ok if db entry could be deleted
+func MongoDeleteDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		RemoveAll(bson.M{fieldDatasetName: dataset.Name})
+
+	return err == nil
+}
+
+// MongoGetDataset returns a dataset
+func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
+	var dataset Dataset
+	err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		Find(bson.M{fieldDatasetName: datasetName}).
+		All(&dataset)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return dataset
+}
+
+/*
 // MongoCreateCollectionIndexes creates the indexes
 func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	// Index
@@ -132,29 +186,6 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-// MongoInsertDataset returns of if the dataset was inserted or already existed
-func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) bool {
-	query := bson.M{fieldDatasetName: dataset.Name}
-	update := bson.M{"$set": dataset}
-	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
-	if err != nil && !mgo.IsDup(err) {
-		fmt.Println(err)
-		return false
-	}
-
-	return true
-}
-
-// MongoDeleteDataset return of if db entry could be deleted
-func MongoDeleteDataset(mongoClient *mgo.Session, dataset Dataset) bool {
-	_, err := mongoClient.
-		DB(database).
-		C(collectionDataset).
-		RemoveAll(bson.M{fieldDatasetName: dataset.Name})
-
-	return err == nil
 }
 
 // MongoInsertTweets returns ok if the tweet was inserted or already existed
@@ -471,3 +502,4 @@ func MongoUpdateAccessKeyConfiguration(mongoClient *mgo.Session, accessKey Acces
 		fmt.Println(err)
 	}
 }
+*/

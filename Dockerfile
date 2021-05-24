@@ -5,5 +5,5 @@ COPY . .
 RUN go get -d -v ./...
 RUN go install -v ./...
 
-EXPOSE 9682
+EXPOSE 9684
 CMD ["app"]

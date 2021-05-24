@@ -1,22 +1,22 @@
 package main
 
 import (
-	"crypto/x509/pkix"
-	"encoding"
-	validator "gopkg.in/validator.v2"
+	"gopkg.in/validator.v2"
+	"time"
 )
 
 // Dataset model
 type Dataset struct {
-	UploadedAt int        `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
-	Content    []Document `json:"content" bson:"content"`
+	UploadedAt time.Time  `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
 	Name       string     `validate:"nonzero" json:"name" bson:"name"`
+	Size       int        `json:"size" bson:"size"`
+	Documents  []Document `json:"documents" bson:"documents"`
 }
 
 // Document model
 type Document struct {
-	// number??
-	Text string `validate:"nonzero" json:"text" bson:"text"`
+	Number int    `json:"number" bson:"number"`
+	Text   string `validate:"nonzero" json:"text"  bson:"text"`
 }
 
 // DetectionResult model
@@ -25,7 +25,47 @@ type DetectionResult struct {
 	//
 }
 
-// Tweet model
+// ResponseMessage model
+type ResponseMessage struct {
+	Message string `json:"message"`
+	Status  bool   `json:"status"`
+}
+
+func (dataset *Dataset) validate() error {
+	return validator.Validate(dataset)
+}
+
+func (document *Document) validate() error {
+	return validator.Validate(document)
+}
+
+/*
+func validateDocument(document Dokument) error {
+
+	err := document.validate()
+	if err != nil {
+		return err
+	}
+	return nil
+}*/
+
+func validateDataset(dataset Dataset) error {
+
+	err := dataset.validate()
+	if err != nil {
+		return err
+	}
+
+	for _, document := range dataset.Documents {
+		err := document.validate()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+/* Tweet model
 type Tweet struct {
 	CreatedAt           int              `validate:"nonzero" json:"created_at" bson:"created_at"`
 	CreatedAtFull       string           `json:"created_at_full" bson:"created_at_full"`
@@ -71,12 +111,6 @@ func (tweetLabel *TweetLabel) validate() error {
 	return validator.Validate(tweetLabel)
 }
 
-// ResponseMessage model
-type ResponseMessage struct {
-	Message string `json:"message"`
-	Status  bool   `json:"status"`
-}
-
 // TwitterAccount model
 type TwitterAccount struct {
 	Names []string `json:"twitter_account_names" bson:"twitter_account_names"`
@@ -113,3 +147,4 @@ type AccessKeyConfiguration struct {
 	GooglePlayStoreAccounts []string `json:"google_play_store_accounts" bson:"google_play_store_accounts"`
 	Topics                  []string `json:"topics" bson:"topics"`
 }
+*/

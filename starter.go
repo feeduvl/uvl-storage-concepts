@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 
+	"gopkg.in/mgo.v2"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -65,12 +67,12 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate dataset
-	/*err = validateTweets(tweets)
+	err = validateDataset(dataset)
 	if err != nil {
 		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	}*/
+	}
 
 	// insert data into the db
 	m := mongoClient.Copy()
@@ -82,27 +84,59 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
-func postDetectionResult() {
+func postDetectionResult(w http.ResponseWriter, r *http.Request) {
+
 	//
+	var data Dataset
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	//
+	json.NewEncoder(w).Encode(ResponseMessage{Message: "everything ok", Status: true})
+	w.WriteHeader(http.StatusOK)
+	return
 }
 
-func getDataset() {
-	//
+func getDataset(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	datasetName := params["dataset"]
+
+	fmt.Println("params: ", datasetName)
+
+	// retrieve data from dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	dataset := MongoGetDataset(m, datasetName)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dataset)
 }
 
-func getAllDatasets() {
+func getAllDatasets(w http.ResponseWriter, r *http.Request) {
 	//
+
 }
 
-func getDetectionResult() {
+func getDetectionResult(w http.ResponseWriter, r *http.Request) {
+
 	//
+
 }
 
-func getAllDetectionResults() {
+func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
+
 	//
+
 }
 
-func deleteDataset() {
+func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	var dataset Dataset
 	err := json.NewDecoder(r.Body).Decode(&dataset)
 	if err != nil {
@@ -126,6 +160,25 @@ func deleteDataset() {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "could not delete dataset", Status: false})
 	}
+}
+
+/*
+func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	tweetedToName := params["account_name"]
+	tweetClass := params["tweet_class"]
+
+	fmt.Println("params: ", tweetedToName, tweetClass)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	tweets := MongoGetTweetOfClass(m, tweetedToName, tweetClass)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tweets)
 }
 
 func postCheckAccessKey(w http.ResponseWriter, r *http.Request) {
@@ -193,3 +246,4 @@ func postAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(accessKeyConfiguration)
 	}
 }
+*/
