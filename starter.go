@@ -63,7 +63,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	// validate dataset
@@ -71,7 +71,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	// insert data into the db
@@ -92,13 +92,13 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	//
 	json.NewEncoder(w).Encode(ResponseMessage{Message: "everything ok", Status: true})
 	w.WriteHeader(http.StatusOK)
-	return
+	panic(err)
 }
 
 func getDataset(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +153,7 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		panic(err)
 	}
 	fmt.Printf("REST call: deleteDataset - %v\n", dataset)
 
@@ -166,7 +166,7 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "dataset successfully deleted", Status: true})
-		return
+		panic(err)
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "could not delete dataset", Status: false})
