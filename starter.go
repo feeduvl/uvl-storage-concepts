@@ -63,6 +63,8 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("postDataset called. Dataset: %s\n", r.Body)
 
+	fmt.Printf("Dataset: %v\n", dataset)
+
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)

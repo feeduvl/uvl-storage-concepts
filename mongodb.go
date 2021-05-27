@@ -98,7 +98,8 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 	err := mongoClient.
 		DB(database).
 		C(collectionDataset).
-		Find(bson.M{fieldDatasetName: datasetName}).
+		//Find(bson.M{fieldDatasetName: datasetName}).
+		Find(nil).
 		All(&dataset)
 	if err != nil {
 		fmt.Println("ERR", err)
