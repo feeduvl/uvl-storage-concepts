@@ -70,16 +70,16 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 }
 
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
-func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
 	update := bson.M{"$set": dataset}
 	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
-		return false
+		return err
 	}
 
-	return true
+	return nil
 }
 
 // MongoDeleteDataset return ok if db entry could be deleted
@@ -94,7 +94,7 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset Dataset) bool {
 
 // MongoGetDataset returns a dataset
 func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
-	var dataset Dataset
+	var dataset []Dataset
 	err := mongoClient.
 		DB(database).
 		C(collectionDataset).
@@ -105,7 +105,7 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 		panic(err)
 	}
 
-	return dataset
+	return dataset[0]
 }
 
 // MongoGetAllDatasets returns a dataset

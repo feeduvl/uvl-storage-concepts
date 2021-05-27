@@ -80,7 +80,12 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	// insert data into the db
 	m := mongoClient.Copy()
 	defer m.Close()
-	MongoInsertDataset(m, dataset)
+	err = MongoInsertDataset(m, dataset)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
 
 	// send response
 	w.WriteHeader(http.StatusOK)
