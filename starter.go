@@ -60,6 +60,9 @@ func makeRouter() *mux.Router {
 func postDataset(w http.ResponseWriter, r *http.Request) {
 	var dataset Dataset
 	err := json.NewDecoder(r.Body).Decode(&dataset)
+
+	fmt.Printf("postDataset called. Dataset: %s\n", r.Body)
+
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
