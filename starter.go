@@ -98,7 +98,7 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	//
 	json.NewEncoder(w).Encode(ResponseMessage{Message: "everything ok", Status: true})
 	w.WriteHeader(http.StatusOK)
-	panic(err)
+	return
 }
 
 func getDataset(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +166,7 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "dataset successfully deleted", Status: true})
-		panic(err)
+		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "could not delete dataset", Status: false})
