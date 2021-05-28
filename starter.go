@@ -52,7 +52,7 @@ func makeRouter() *mux.Router {
 	//router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
-	router.HandleFunc("/hitec/repository/concepts/dataset", deleteDataset).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
 
 	return router
 }
