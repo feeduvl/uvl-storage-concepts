@@ -156,14 +156,11 @@ func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteDataset(w http.ResponseWriter, r *http.Request) {
-	var dataset string
-	err := json.NewDecoder(r.Body).Decode(&dataset)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
-	fmt.Printf("REST call: deleteDataset - %v\n", dataset)
+
+	params := mux.Vars(r)
+	dataset := params["dataset"]
+
+	fmt.Printf("REST call: deleteDataset - %s\n", dataset)
 
 	m := mongoClient.Copy()
 	defer m.Close()
@@ -173,11 +170,11 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if ok {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "dataset successfully deleted", Status: true})
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Dataset successfully deleted", Status: true})
 		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "could not delete dataset", Status: false})
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
 	}
 }
 
