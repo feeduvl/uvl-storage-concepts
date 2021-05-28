@@ -83,11 +83,11 @@ func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 }
 
 // MongoDeleteDataset return ok if db entry could be deleted
-func MongoDeleteDataset(mongoClient *mgo.Session, dataset Dataset) bool {
+func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionDataset).
-		RemoveAll(bson.M{fieldDatasetName: dataset.Name})
+		RemoveAll(bson.M{fieldDatasetName: dataset})
 
 	return err == nil
 }
@@ -98,8 +98,7 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 	err := mongoClient.
 		DB(database).
 		C(collectionDataset).
-		//Find(bson.M{fieldDatasetName: datasetName}).
-		Find(nil).
+		Find(bson.M{fieldDatasetName: datasetName}).
 		All(&dataset)
 	if err != nil {
 		fmt.Println("ERR", err)

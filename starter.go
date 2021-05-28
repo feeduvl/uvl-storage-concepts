@@ -156,7 +156,7 @@ func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteDataset(w http.ResponseWriter, r *http.Request) {
-	var dataset Dataset
+	var dataset string
 	err := json.NewDecoder(r.Body).Decode(&dataset)
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
