@@ -61,9 +61,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	var dataset Dataset
 	err := json.NewDecoder(r.Body).Decode(&dataset)
 
-	fmt.Printf("postDataset called. Dataset: %s\n", r.Body)
-
-	fmt.Printf("Dataset: %v\n", dataset)
+	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
 
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
@@ -116,7 +114,7 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	datasetName := params["dataset"]
 
-	fmt.Println("params: ", datasetName)
+	fmt.Println("REST call: getDataset, params: ", datasetName)
 
 	// retrieve data from dataset
 	m := mongoClient.Copy()

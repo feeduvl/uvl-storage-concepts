@@ -110,26 +110,24 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 }
 
 // MongoGetAllDatasets returns a dataset
-func MongoGetAllDatasets(mongoClient *mgo.Session) string {
+func MongoGetAllDatasets(mongoClient *mgo.Session) []string {
 
-	job := &mgo.MapReduce{
-		Map:    "function() { for (var key in this) { emit(key, null); } }",
-		Reduce: "function(key, stuff) { return null; }",
-		Out:    "datasetNames" + "_keys",
-	}
+	var datasetNames []string
 
-	datasetNames, err := mongoClient.
+	err := mongoClient.
 		DB(database).
 		C(collectionDataset).
 		Find(nil).
-		MapReduce(job, nil)
+		Distinct(fieldDatasetName, &datasetNames)
 
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
 	}
 
-	return datasetNames.Collection
+	fmt.Printf("getAllDatasets result: %s\n", datasetNames)
+
+	return datasetNames
 }
 
 /*
