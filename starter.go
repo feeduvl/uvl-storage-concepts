@@ -47,7 +47,7 @@ func makeRouter() *mux.Router {
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
-	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", getDetectionResult).Methods("GET")
+	//router.HandleFunc("/hitec/repository/concepts/detection/result/", getDetectionResult).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 	//router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
@@ -101,6 +101,8 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err)
 	}
+
+	fmt.Printf("postDetectionResult called. Method: %s, Time: %s \n", result.Method, result.StartedAt)
 
 	// validate result
 	err = validateResult(result)
@@ -167,7 +169,17 @@ func getDetectionResult(w http.ResponseWriter, r *http.Request) {
 
 func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 
-	//
+	fmt.Printf("REST call: getAllDetectionResults")
+
+	// retrieve all Results
+	m := mongoClient.Copy()
+	defer m.Close()
+	results := MongoGetAllResults(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(results)
 
 }
 

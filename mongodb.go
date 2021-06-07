@@ -152,6 +152,22 @@ func MongoGetAllDatasets(mongoClient *mgo.Session) []string {
 	return datasetNames
 }
 
+// MongoGetAllResults returns all results
+func MongoGetAllResults(mongoClient *mgo.Session) []Result {
+	var results []Result
+	err := mongoClient.
+		DB(database).
+		C(collectionResult).
+		Find(nil).
+		All(&results)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return results
+}
+
 /*
 // MongoCreateCollectionIndexes creates the indexes
 func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
