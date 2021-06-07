@@ -65,10 +65,18 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	if err != nil {
 		panic(err)
 	}
-
 	// Index
-	// Result etc.
-
+	resultIndex := mgo.Index{
+		Key:        []string{fieldResultMethodName, fieldResultStartedAt},
+		Unique:     true,
+		Background: true,
+		Sparse:     true,
+	}
+	resultCollection := mongoClient.DB(database).C(collectionResult)
+	err = resultCollection.EnsureIndex(resultIndex)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
