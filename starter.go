@@ -58,16 +58,15 @@ func makeRouter() *mux.Router {
 }
 
 func postDataset(w http.ResponseWriter, r *http.Request) {
+
 	var dataset Dataset
 	err := json.NewDecoder(r.Body).Decode(&dataset)
-
-	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
-
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err)
 	}
+	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
 
 	// validate dataset
 	err = validateDataset(dataset)
@@ -94,19 +93,36 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 
 func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 
-	//
-	var data Dataset
-	err := json.NewDecoder(r.Body).Decode(&data)
+	// parse request
+	var result Result
+	err := json.NewDecoder(r.Body).Decode(&result)
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err)
 	}
 
-	//
-	json.NewEncoder(w).Encode(ResponseMessage{Message: "everything ok", Status: true})
+	// validate result
+	err = validateResult(result)
+	if err != nil {
+		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertResult(m, result)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
 	w.WriteHeader(http.StatusOK)
-	return
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func getDataset(w http.ResponseWriter, r *http.Request) {

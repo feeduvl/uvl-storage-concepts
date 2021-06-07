@@ -19,16 +19,26 @@ type Document struct {
 	Text   string `validate:"nonzero" json:"text"  bson:"text"`
 }
 
-// DetectionResult model
-type DetectionResult struct {
-	// concepts
-	//
+// Result model
+type Result struct {
+	Method      string                 `validate:"nonzero" json:"method" bson:"method"`
+	Status      string                 `validate:"nonzero" json:"status" bson:"method"`
+	StartedAt   time.Time              `validate:"nonzero" json:"started_at" bson:"started_at"`
+	Dataset     Dataset                `json:"dataset" bson:"method"`
+	DatasetName string                 `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
+	Params      map[string]string      `json:"params" bson:"method"`
+	Topics      map[string]interface{} `json:"topics" bson:"method"`
+	DocTopic    map[string]interface{} `json:"doc_topic" bson:"method"`
 }
 
 // ResponseMessage model
 type ResponseMessage struct {
 	Message string `json:"message"`
 	Status  bool   `json:"status"`
+}
+
+func (result *Result) validate() error {
+	return validator.Validate(result)
 }
 
 func (dataset *Dataset) validate() error {
@@ -62,6 +72,16 @@ func validateDataset(dataset Dataset) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func validateResult(result Result) error {
+
+	err := result.validate()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

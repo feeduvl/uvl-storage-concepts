@@ -16,6 +16,8 @@ const (
 
 	fieldDatasetName       = "name"
 	fieldDatasetUploadedAt = "uploaded_at"
+	fieldResultStartedAt   = "started_at"
+	fieldResultMethodName  = "method"
 )
 
 // MongoGetSession returns a session
@@ -74,6 +76,19 @@ func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
 	update := bson.M{"$set": dataset}
 	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+// MongoInsertResult returns ok if the result was inserted or already existed
+func MongoInsertResult(mongoClient *mgo.Session, result Result) error {
+	query := bson.M{fieldResultMethodName: result.Method, fieldResultStartedAt: result.StartedAt}
+	update := bson.M{"$set": result}
+	_, err := mongoClient.DB(database).C(collectionResult).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
 		return err
