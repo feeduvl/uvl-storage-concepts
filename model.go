@@ -22,12 +22,12 @@ type Document struct {
 // Result model
 type Result struct {
 	Method      string                 `validate:"nonzero" json:"method" bson:"method"`
-	Status      string                 `validate:"nonzero" json:"status" bson:"method"`
+	Status      string                 `validate:"nonzero" json:"status" bson:"status"`
 	StartedAt   time.Time              `validate:"nonzero" json:"started_at" bson:"started_at"`
 	DatasetName string                 `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
-	Params      map[string]string      `json:"params" bson:"method"`
-	Topics      map[string]interface{} `json:"topics" bson:"method"`
-	DocTopic    map[string]interface{} `json:"doc_topic" bson:"method"`
+	Params      map[string]string      `json:"params" bson:"params"`
+	Topics      map[string]interface{} `json:"topics" bson:"topics"`
+	DocTopic    map[string]interface{} `json:"doc_topic" bson:"doc_topic"`
 }
 
 // ResponseMessage model
