@@ -24,7 +24,6 @@ type Result struct {
 	Method      string                 `validate:"nonzero" json:"method" bson:"method"`
 	Status      string                 `validate:"nonzero" json:"status" bson:"method"`
 	StartedAt   time.Time              `validate:"nonzero" json:"started_at" bson:"started_at"`
-	Dataset     Dataset                `json:"dataset" bson:"method"`
 	DatasetName string                 `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
 	Params      map[string]string      `json:"params" bson:"method"`
 	Topics      map[string]interface{} `json:"topics" bson:"method"`
