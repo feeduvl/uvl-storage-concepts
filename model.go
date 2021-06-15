@@ -17,6 +17,7 @@ type Dataset struct {
 type Document struct {
 	Number int    `json:"number" bson:"number"`
 	Text   string `validate:"nonzero" json:"text"  bson:"text"`
+	Id     string `json:"id" bson:"id"`
 }
 
 // Result model
