@@ -30,6 +30,7 @@ type Result struct {
 	Topics      map[string]interface{} `json:"topics" bson:"topics"`
 	DocTopic    map[string]interface{} `json:"doc_topic" bson:"doc_topic"`
 	Metrics     map[string]interface{} `json:"metrics" bson:"metrics"`
+	Name        string                 `json:"name" bson:"name"`
 }
 
 // ResponseMessage model
