@@ -148,7 +148,7 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 
 func getAllDatasets(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Printf("REST call: getAllDatasets")
+	fmt.Printf("REST call: getAllDatasets\n")
 
 	// retrieve all dataset names
 	m := mongoClient.Copy()
@@ -170,7 +170,7 @@ func getDetectionResult(w http.ResponseWriter, r *http.Request) {
 
 func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Printf("REST call: getAllDetectionResults")
+	fmt.Printf("REST call: getAllDetectionResults\n")
 
 	// retrieve all Results
 	m := mongoClient.Copy()
