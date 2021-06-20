@@ -116,7 +116,7 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 }
 
 // MongoDeleteResult return ok if db entry could be deleted
-func MongoDeleteResult(mongoClient *mgo.Session, result string) bool {
+func MongoDeleteResult(mongoClient *mgo.Session, result time.Time) bool {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionResult).

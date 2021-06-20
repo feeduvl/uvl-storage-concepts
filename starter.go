@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"gopkg.in/mgo.v2"
 
@@ -214,9 +215,18 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("REST call: deleteResult - %s\n", result)
 
+	layout := "2006-01-02T15:04:05.000Z"
+	t, err := time.Parse(layout, result)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		return
+	}
+
 	m := mongoClient.Copy()
 	defer m.Close()
-	ok := MongoDeleteDataset(m, result)
+	ok := MongoDeleteResult(m, t)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
@@ -226,7 +236,7 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not result dataset", Status: false})
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
 }
 
