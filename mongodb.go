@@ -115,6 +115,16 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 	return err == nil
 }
 
+// MongoDeleteResult return ok if db entry could be deleted
+func MongoDeleteResult(mongoClient *mgo.Session, result string) bool {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionResult).
+		RemoveAll(bson.M{fieldResultStartedAt: result})
+
+	return err == nil
+}
+
 // MongoGetDataset returns a dataset
 func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 	var dataset []Dataset

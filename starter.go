@@ -53,6 +53,7 @@ func makeRouter() *mux.Router {
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", deleteResult).Methods("DELETE")
 
 	return router
 }
@@ -203,6 +204,29 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
+	}
+}
+
+func deleteResult(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	result := params["result"]
+
+	fmt.Printf("REST call: deleteResult - %s\n", result)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	ok := MongoDeleteDataset(m, result)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if ok {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Result successfully deleted", Status: true})
+		return
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not result dataset", Status: false})
 	}
 }
 
