@@ -138,7 +138,13 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 		panic(err)
 	}
 
-	return dataset[0]
+	// Return empty dataset if not found
+	if len(dataset) == 0 {
+		d := Dataset{}
+		return d
+	} else {
+		return dataset[0]
+	}
 }
 
 // MongoGetResult returns a dataset
@@ -154,7 +160,13 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 		panic(err)
 	}
 
-	return result[0]
+	// Return empty result if not found
+	if len(result) == 0 {
+		r := Result{}
+		return r
+	} else {
+		return result[0]
+	}
 }
 
 // MongoGetAllDatasets returns a dataset
