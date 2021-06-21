@@ -141,6 +141,22 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 	return dataset[0]
 }
 
+// MongoGetResult returns a dataset
+func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
+	var result []Result
+	err := mongoClient.
+		DB(database).
+		C(collectionResult).
+		Find(bson.M{fieldResultStartedAt: startedAt}).
+		All(&result)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return result[0]
+}
+
 // MongoGetAllDatasets returns a dataset
 func MongoGetAllDatasets(mongoClient *mgo.Session) []string {
 

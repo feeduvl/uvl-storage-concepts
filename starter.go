@@ -42,15 +42,13 @@ func makeRouter() *mux.Router {
 	// Insert
 	router.HandleFunc("/hitec/repository/concepts/store/dataset/", postDataset).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
-	//router.HandleFunc("/hitec/repository/twitter/access_key", postCheckAccessKey).Methods("POST")
-	//router.HandleFunc("/hitec/repository/twitter/access_key/update", postUpdateAccessKeyConfiguration).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
 	//router.HandleFunc("/hitec/repository/concepts/detection/result/", getDetectionResult).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
-	//router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
@@ -118,6 +116,39 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	err = MongoInsertResult(m, result)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
+
+	// parse request
+	var result Result
+	err := json.NewDecoder(r.Body).Decode(&result)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	fmt.Printf("postUpdateResultName called. Name: %s, Time: %s \n", result.Name, result.StartedAt)
+
+	// retrieve result
+	m := mongoClient.Copy()
+	defer m.Close()
+	res := MongoGetResult(m, result.StartedAt)
+
+	res.Name = result.Name
+
+	// insert updated result
+	err = MongoInsertResult(m, res)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
