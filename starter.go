@@ -3,13 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"time"
-
-	"gopkg.in/mgo.v2"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -267,7 +265,7 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	ok := MongoDeleteResult(m, t)
+	ok := MongoDeleteResult(m, t.Date)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
