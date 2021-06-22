@@ -250,18 +250,11 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 	var t Date
 	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
 	if err != nil {
-		fmt.Printf("ERROR: %s for parsing date: %s\n", err, _t)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
-	fmt.Printf("Parsed time: %s\n", t)
-
-	/*if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
-		fmt.Printf("ERROR parsing date: %s\n", err)
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, result)
 		return
-	}*/
+	}
 
 	m := mongoClient.Copy()
 	defer m.Close()
