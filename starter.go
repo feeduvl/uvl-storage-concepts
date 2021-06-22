@@ -247,20 +247,23 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("REST call: deleteResult - %s\n", result)
 
-	// Fix date format in case of a missing trailing zero
-	if len(result) == 23 {
-		result = strings.Replace(result, "Z", "0Z", 1)
-	}
-
-	layout := "2006-01-02T15:04:05.000Z"
-	t, err := time.Parse(layout, result)
-
+	_t := "{date: " + result + "}"
+	// parse time
+	var t Date
+	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
 	if err != nil {
+		fmt.Printf("ERROR: %s for parsing date: %s\n", err, _t)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+	fmt.Printf("Parsed time: %s\n", t)
+
+	/*if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
 		fmt.Printf("ERROR parsing date: %s\n", err)
 		return
-	}
+	}*/
 
 	m := mongoClient.Copy()
 	defer m.Close()

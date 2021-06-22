@@ -39,6 +39,11 @@ type ResponseMessage struct {
 	Status  bool   `json:"status"`
 }
 
+// Date model, helper for parsing dates
+type Date struct {
+	Date time.Time `json:"date"`
+}
+
 func (result *Result) validate() error {
 	return validator.Validate(result)
 }
