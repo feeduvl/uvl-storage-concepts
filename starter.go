@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -209,10 +210,6 @@ func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 	defer m.Close()
 	results := MongoGetAllResults(m)
 
-	for re := range results {
-		fmt.Printf("ResultDate: %s\n", results[re].StartedAt)
-	}
-
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
@@ -249,6 +246,11 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 	result := params["result"]
 
 	fmt.Printf("REST call: deleteResult - %s\n", result)
+
+	// Fix date format in case of a missing trailing zero
+	if len(result) == 23 {
+		result = strings.Replace(result, "Z", "0Z", 1)
+	}
 
 	layout := "2006-01-02T15:04:05.000Z"
 	t, err := time.Parse(layout, result)
