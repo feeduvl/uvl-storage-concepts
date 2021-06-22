@@ -209,6 +209,10 @@ func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 	defer m.Close()
 	results := MongoGetAllResults(m)
 
+	for re := range results {
+		fmt.Printf("ResultDate: %s\n", results[re].StartedAt)
+	}
+
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
