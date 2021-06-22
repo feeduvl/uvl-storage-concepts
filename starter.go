@@ -245,7 +245,7 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("REST call: deleteResult - %s\n", result)
 
-	_t := "{date: " + result + "}"
+	_t := "{'date': '" + result + "'}"
 	// parse time
 	var t Date
 	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
