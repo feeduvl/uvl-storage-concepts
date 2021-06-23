@@ -144,6 +144,12 @@ func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
 	defer m.Close()
 	res := MongoGetResult(m, result.StartedAt)
 
+	if res.Status != "finished" && res.Status != "failed" {
+		fmt.Printf("ERROR: can not change name for result with status: %s\n", res.Status)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	res.Name = result.Name
 
 	// insert updated result
