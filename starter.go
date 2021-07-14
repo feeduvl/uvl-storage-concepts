@@ -40,6 +40,7 @@ func makeRouter() *mux.Router {
 
 	// Insert
 	router.HandleFunc("/hitec/repository/concepts/store/dataset/", postDataset).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/groundtruth/", postAddGroundTruth).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 
@@ -165,6 +166,39 @@ func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
+func postAddGroundTruth(w http.ResponseWriter, r *http.Request) {
+
+	// parse request
+	var dataset Dataset
+	err := json.NewDecoder(r.Body).Decode(&dataset)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	fmt.Printf("postAddGroundTruth called. Dataset Name: %s. \n", dataset.Name)
+
+	// retrieve dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	data := MongoGetDataset(m, dataset.Name)
+
+	data.GroundTruth = dataset.GroundTruth
+
+	// insert updated result
+	err = MongoInsertDataset(m, data)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
 func getDataset(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
@@ -180,10 +214,10 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dataset)
+	_ = json.NewEncoder(w).Encode(dataset)
 }
 
-func getAllDatasets(w http.ResponseWriter, r *http.Request) {
+func getAllDatasets(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getAllDatasets\n")
 
@@ -195,17 +229,11 @@ func getAllDatasets(w http.ResponseWriter, r *http.Request) {
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(datasets)
+	_ = json.NewEncoder(w).Encode(datasets)
 
 }
 
-func getDetectionResult(w http.ResponseWriter, r *http.Request) {
-
-	//
-
-}
-
-func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
+func getAllDetectionResults(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getAllDetectionResults\n")
 
@@ -217,7 +245,7 @@ func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(results)
+	_ = json.NewEncoder(w).Encode(results)
 
 }
 
@@ -236,11 +264,11 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if ok {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Dataset successfully deleted", Status: true})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Dataset successfully deleted", Status: true})
 		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
 	}
 }
 
@@ -257,7 +285,7 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
 		fmt.Printf("ERROR parsing date: %s date: %s\n", err, result)
 		return
 	}
@@ -270,11 +298,11 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if ok {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Result successfully deleted", Status: true})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Result successfully deleted", Status: true})
 		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
 }
 

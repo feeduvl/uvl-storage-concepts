@@ -7,10 +7,17 @@ import (
 
 // Dataset model
 type Dataset struct {
-	UploadedAt time.Time  `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
-	Name       string     `validate:"nonzero" json:"name" bson:"name"`
-	Size       int        `json:"size" bson:"size"`
-	Documents  []Document `json:"documents" bson:"documents"`
+	UploadedAt  time.Time      `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
+	Name        string         `validate:"nonzero" json:"name" bson:"name"`
+	Size        int            `json:"size" bson:"size"`
+	Documents   []Document     `json:"documents" bson:"documents"`
+	GroundTruth []TruthElement `json:"ground_truth" bson:"ground_truth"`
+}
+
+//TruthElement model
+type TruthElement struct {
+	Id    string `json:"id" bson:"id"`
+	Value string `json:"value"  bson:"value"`
 }
 
 // Document model
@@ -57,7 +64,7 @@ func (document *Document) validate() error {
 }
 
 /*
-func validateDocument(document Dokument) error {
+func validateDocument(document Document) error {
 
 	err := document.validate()
 	if err != nil {
