@@ -1,5 +1,5 @@
 
-FROM golang:1.9
+FROM golang:1.15
 WORKDIR /go/src/app
 COPY . .
 RUN go get -t -d -v ./...
