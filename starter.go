@@ -47,7 +47,6 @@ func makeRouter() *mux.Router {
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
-	//router.HandleFunc("/hitec/repository/concepts/detection/result/", getDetectionResult).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 
 	// Delete
