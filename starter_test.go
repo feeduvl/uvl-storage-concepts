@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/mgo.v2/dbtest"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,6 +18,7 @@ import (
 )
 
 var router *mux.Router
+var mockDBServer dbtest.DBServer
 var documents []Document
 
 /*var tweets []Tweet
@@ -50,10 +53,11 @@ func setupRouter() {
 }
 
 func setupDB() {
+	tempDir, _ := ioutil.TempDir("", "testing")
+	mockDBServer.SetPath(tempDir)
 
-	mongoClient = MongoGetSession(os.Getenv("MONGO_IP"), os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"), databaseTest)
+	mongoClient = mockDBServer.Session()
 	MongoCreateCollectionIndexes(mongoClient)
-
 }
 
 func fillDB() {
@@ -294,6 +298,7 @@ func addDatasets() {
 func tearDown() {
 	fmt.Println("--- --- tear down")
 	mongoClient.Close()
+	mockDBServer.Stop() // Stop shuts down the temporary server and removes data on disk.
 }
 
 type endpoint struct {
