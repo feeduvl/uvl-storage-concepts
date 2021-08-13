@@ -1,13 +1,15 @@
-FROM ubuntu:20.04
+FROM mongo:latest
 
-RUN apt-get update && apt-get install -y mongodb
-
-RUN apt-get install -y golang
+FROM golang:1.15
+COPY --from=golang:1.15-alpine /usr/local/go/ /usr/local/go/
+ENV PATH="/usr/local/go/bin:${PATH}"
 
 WORKDIR /go/src/app
 COPY . .
-RUN go get -d -v ./...
+RUN go get -t -d -v ./...
 RUN go install -v ./...
+
+EXPOSE 9684
 
 RUN go test -cover
 
