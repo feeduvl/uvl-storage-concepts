@@ -21,8 +21,7 @@ const (
 var mongoClient *mgo.Session
 
 func main() {
-	// log.SetOutput(os.Stdout)
-	mongoClient = MongoGetSession(os.Getenv("MONGO_IP"), os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"))
+	mongoClient = MongoGetSession(os.Getenv("MONGO_IP"), os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"), database)
 	MongoCreateCollectionIndexes(mongoClient)
 
 	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With"})
@@ -304,89 +303,3 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
 }
-
-/*
-func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
-	// get request param
-	params := mux.Vars(r)
-	tweetedToName := params["account_name"]
-	tweetClass := params["tweet_class"]
-
-	fmt.Println("params: ", tweetedToName, tweetClass)
-
-	m := mongoClient.Copy()
-	defer m.Close()
-	tweets := MongoGetTweetOfClass(m, tweetedToName, tweetClass)
-
-	// write the response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tweets)
-}
-
-func postCheckAccessKey(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Printf("REST call (postCheckAccessKey)\n")
-
-	// insert data into the db
-	m := mongoClient.Copy()
-	defer m.Close()
-	accessKeyExists := MongoGetAccessKeyExists(m, accessKey)
-
-	// send response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ResponseMessage{Message: "access key status", Status: accessKeyExists})
-}
-
-func postUpdateAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Printf("REST call (postUpdateAccessKeyConfiguration) %s\n", accessKey)
-
-	// insert data into the db
-	m := mongoClient.Copy()
-	defer m.Close()
-	MongoUpdateAccessKeyConfiguration(m, accessKey)
-
-	// send response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-}
-
-func postAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	m := mongoClient.Copy()
-	defer m.Close()
-
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	accessKeyExists := MongoGetAccessKeyExists(m, accessKey)
-	if !accessKeyExists {
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		accessKeyConfiguration := MongoGetAccessKeyConfiguration(m, accessKey)
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(accessKeyConfiguration)
-	}
-}
-*/

@@ -11,6 +11,7 @@ import (
 
 const (
 	database          = "concepts_data"
+	databaseTest      = "concepts_data_test"
 	collectionDataset = "dataset"
 	collectionResult  = "result"
 
@@ -21,11 +22,11 @@ const (
 )
 
 // MongoGetSession returns a session
-func MongoGetSession(mongoIP, username, password string) *mgo.Session {
+func MongoGetSession(mongoIP, username, password string, db string) *mgo.Session {
 	info := &mgo.DialInfo{
 		Addrs:    []string{mongoIP},
 		Timeout:  60 * time.Second,
-		Database: database,
+		Database: db,
 		Username: username,
 		Password: password,
 	}
