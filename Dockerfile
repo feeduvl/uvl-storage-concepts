@@ -1,4 +1,6 @@
-FROM mongo:latest
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y mongodb
 
 WORKDIR /tmp/go
 RUN wget https://dl.google.com/go/go1.15.4.linux-amd64.tar.gz
