@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y mongodb
 
-RUN apt-get install golang
+RUN apt-get install -y golang
 
 WORKDIR /go/src/app
 COPY . .
