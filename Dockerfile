@@ -1,6 +1,8 @@
-FROM golang:1.15-alpine
+FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y mongodb
+
+RUN apt-get install golang
 
 WORKDIR /go/src/app
 COPY . .
