@@ -1,7 +1,6 @@
-FROM mongo:latest
+FROM golang:1.15
 
-COPY --from=golang:1.15-alpine /usr/local/go/ /usr/local/go/
-ENV PATH="/usr/local/go/bin:${PATH}"
+RUN apt-get update && apt-get install -y mongodb
 
 WORKDIR /go/src/app
 COPY . .
