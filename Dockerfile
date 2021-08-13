@@ -6,8 +6,7 @@ RUN apt-get install -y wget
 
 WORKDIR /tmp/go
 RUN wget https://dl.google.com/go/go1.15.4.linux-amd64.tar.gz
-RUN tar -xvf go1.15.4.linux-amd64.tar.gz
-RUN mv go /usr/local
+RUN tar -xz -C /usr/local go1.15.4.linux-amd64.tar.gz
 RUN export GOROOT=/usr/local/go
 RUN export GOPATH=$HOME/gopojects/go
 RUN export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
