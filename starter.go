@@ -70,7 +70,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
 
@@ -79,7 +79,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	// insert data into the db
@@ -101,7 +101,7 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	fmt.Printf("postDetectionResult called. Method: %s, Time: %s \n", result.Method, result.StartedAt)
@@ -111,7 +111,7 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	// insert data into the db
@@ -133,7 +133,7 @@ func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	fmt.Printf("postUpdateResultName called. Name: %s, Time: %s \n", result.Name, result.StartedAt)
@@ -168,7 +168,7 @@ func postAddGroundTruth(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	fmt.Printf("postAddGroundTruth called. Dataset Name: %s. \n", dataset.Name)
@@ -177,6 +177,17 @@ func postAddGroundTruth(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	data := MongoGetDataset(m, dataset.Name)
+
+	if data.Name != dataset.Name {
+		fmt.Printf("Error adding groundtruth, dataset does not exist.\n")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if dataset.Name == "" {
+		fmt.Printf("Error adding groundtruth, datset name invalid.\n")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	data.GroundTruth = dataset.GroundTruth
 
