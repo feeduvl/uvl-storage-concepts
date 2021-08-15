@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/dbtest"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
