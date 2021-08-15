@@ -7,8 +7,4 @@ RUN go install -v ./...
 
 EXPOSE 9684
 
-RUN go test -cover
-
-EXPOSE 9684
-
 CMD ["app"]
