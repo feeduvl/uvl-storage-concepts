@@ -55,6 +55,14 @@ func makeRouter() *mux.Router {
 	return router
 }
 
+func handleErrorWithRequest(err error, w http.ResponseWriter) {
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+}
+
 func postDataset(w http.ResponseWriter, r *http.Request) {
 
 	var dataset Dataset
@@ -78,11 +86,7 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	err = MongoInsertDataset(m, dataset)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
+	handleErrorWithRequest(err, w)
 
 	// send response
 	w.WriteHeader(http.StatusOK)
@@ -114,11 +118,7 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	err = MongoInsertResult(m, result)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
+	handleErrorWithRequest(err, w)
 
 	// send response
 	w.WriteHeader(http.StatusOK)
@@ -153,11 +153,7 @@ func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
 
 	// insert updated result
 	err = MongoInsertResult(m, res)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
+	handleErrorWithRequest(err, w)
 
 	// send response
 	w.WriteHeader(http.StatusOK)
@@ -186,11 +182,7 @@ func postAddGroundTruth(w http.ResponseWriter, r *http.Request) {
 
 	// insert updated result
 	err = MongoInsertDataset(m, data)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
+	handleErrorWithRequest(err, w)
 
 	// send response
 	w.WriteHeader(http.StatusOK)

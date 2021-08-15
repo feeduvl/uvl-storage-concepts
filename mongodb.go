@@ -20,6 +20,22 @@ const (
 	fieldResultMethodName  = "method"
 )
 
+func panicError(err error) {
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+}
+
+func handleErrorInsert(err error) error {
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return err
+	} else {
+		return nil
+	}
+}
+
 // MongoGetSession returns a session
 func MongoGetSession(mongoIP, username, password string, db string) *mgo.Session {
 	info := &mgo.DialInfo{
@@ -51,9 +67,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	}
 	datasetCollection := mongoClient.DB(database).C(collectionDataset)
 	err := datasetCollection.EnsureIndex(datasetIndex)
-	if err != nil {
-		panic(err)
-	}
+	panicError(err)
 	// Index
 	datasetSecondIndex := mgo.Index{
 		Key:        []string{fieldDatasetName, fieldDatasetUploadedAt},
@@ -62,9 +76,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 		Sparse:     true,
 	}
 	err = datasetCollection.EnsureIndex(datasetSecondIndex)
-	if err != nil {
-		panic(err)
-	}
+	panicError(err)
 	// Index
 	resultIndex := mgo.Index{
 		Key:        []string{fieldResultMethodName, fieldResultStartedAt},
@@ -74,9 +86,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	}
 	resultCollection := mongoClient.DB(database).C(collectionResult)
 	err = resultCollection.EnsureIndex(resultIndex)
-	if err != nil {
-		panic(err)
-	}
+	panicError(err)
 }
 
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
@@ -84,12 +94,8 @@ func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
 	update := bson.M{"$set": dataset}
 	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
-	if err != nil && !mgo.IsDup(err) {
-		fmt.Println(err)
-		return err
-	}
 
-	return nil
+	return handleErrorInsert(err)
 }
 
 // MongoInsertResult returns ok if the result was inserted or already existed
@@ -97,12 +103,8 @@ func MongoInsertResult(mongoClient *mgo.Session, result Result) error {
 	query := bson.M{fieldResultMethodName: result.Method, fieldResultStartedAt: result.StartedAt}
 	update := bson.M{"$set": result}
 	_, err := mongoClient.DB(database).C(collectionResult).Upsert(query, update)
-	if err != nil && !mgo.IsDup(err) {
-		fmt.Println(err)
-		return err
-	}
 
-	return nil
+	return handleErrorInsert(err)
 }
 
 // MongoDeleteDataset return ok if db entry could be deleted
@@ -133,10 +135,7 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 		C(collectionDataset).
 		Find(bson.M{fieldDatasetName: datasetName}).
 		All(&dataset)
-	if err != nil {
-		fmt.Println("ERR", err)
-		panic(err)
-	}
+	panicError(err)
 
 	// Return empty dataset if not found
 	if len(dataset) == 0 {
@@ -155,10 +154,7 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 		C(collectionResult).
 		Find(bson.M{fieldResultStartedAt: startedAt}).
 		All(&result)
-	if err != nil {
-		fmt.Println("ERR", err)
-		panic(err)
-	}
+	panicError(err)
 
 	// Return empty result if not found
 	if len(result) == 0 {
@@ -180,10 +176,7 @@ func MongoGetAllDatasets(mongoClient *mgo.Session) []string {
 		Find(nil).
 		Distinct(fieldDatasetName, &datasetNames)
 
-	if err != nil {
-		fmt.Println("ERR", err)
-		panic(err)
-	}
+	panicError(err)
 
 	fmt.Printf("getAllDatasets result: %s\n", datasetNames)
 
@@ -198,10 +191,7 @@ func MongoGetAllResults(mongoClient *mgo.Session) []Result {
 		C(collectionResult).
 		Find(nil).
 		All(&results)
-	if err != nil {
-		fmt.Println("ERR", err)
-		panic(err)
-	}
+	panicError(err)
 
 	return results
 }
