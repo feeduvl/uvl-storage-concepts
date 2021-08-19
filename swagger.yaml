@@ -1,282 +1,217 @@
----
-swagger: "2.0"
+openapi: 3.0.1
 info:
-  description: This API is the database interface for information related to Twitter.
-  version: "1.0.1"
-  title: This API is the database interface for information related to Twitter.
-  contact:
-    email: stanik@informatik.uni-hamburg.de
+  title: This API is the database interface for datasets and run results.
+  description: This API is the database interface for datasets and run results.
+  version: "1.0"
+servers:
+  - url: 'https://feed-uvl.ifi.uni-heidelberg.de'
 paths:
-  /store/tweet/:
+  /hitec/repository/concepts/store/dataset/:
     post:
-      summary: Store a list of tweets.
-      description: Store a list of tweets.
-      operationId: postTweet
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: tweet
-          required: true
-          schema:
-            $ref: "#/definitions/Tweets"
+      summary: Store a dataset
+      description: Store a dataset.
+      operationId: postDataset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dataset'
+        required: true
       responses:
         200:
-          description: Tweets successfully stored.
+          description: Dataset successfully stored.
+          content: {}
         400:
-          description: bad input parameter or no tweet could be retrieved.
-  /label/tweet/:
+          description: Bad input parameter or invalid data.
+          content: {}
+      x-codegen-request-body-name: dataset
+  /hitec/repository/concepts/store/groundtruth/:
     post:
-      summary: stores a human created label for a tweet.
-      description: stores a human created label for a tweet.
-      operationId: postLabelTwitter
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: tweetlabel
-          required: true
-          schema:
-            $ref: "#/definitions/TweetLabel"
+      summary: Stores groundtruth data for a dataset
+      description: Accept an empty dataset when the dataset name is already in database adds the groundtruth.
+      operationId: postAddGroundTruth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dataset'
+        required: true
       responses:
         200:
-          description: Tweets successfully stored.
+          description: Groundtruth successfully added.
+          content: {}
         400:
-          description: bad input parameter or no tweet could be retrieved.
-  /store/observable/:
+          description: Bad input parameter or dataset name invalid/non-existent.
+          content: {}
+      x-codegen-request-body-name: Dataset
+  /hitec/repository/concepts/store/detection/result/:
     post:
-      summary: Stores a twitter profile as under observation (will be crawled frequently)
-      description: Stores a twitter profile as under observation (will be crawled frequently)
-      operationId: postObservableTwitter
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: observableTwitter
-          required: true
-          schema:
-            $ref: "#/definitions/ObservableTwitter"
+      summary: Stores a result in the database
+      description: Stores a result in the database.
+      operationId: postDetectionResult
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Result'
+        required: true
       responses:
         200:
-          description: observable twitter profile successfully stored.
+          description: Result successfully stored.
+          content: {}
         400:
-          description: bad input parameter or no tweet could be retrieved.
+          description: Bad input parameter.
+          content: {}
+      x-codegen-request-body-name: Result
+  /hitec/repository/concepts/store/detection/result/name:
+    post:
+      summary: Changes the name of a result
+      description: Changes the name of a result, takes a result object with a valid timestamp for a result in the database.
+      operationId: postUpdateResultName
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Result'
+        required: true
+      responses:
+        200:
+          description: Result name successfully changed.
+          content: {}
+        400:
+          description: Bad input parameter or name could not be changed.
+          content: {}
+      x-codegen-request-body-name: Result
+  /hitec/repository/concepts/detection/result/all:
+    get:
+      summary: Returns all results
+      description: Returns all results.
+      operationId: getAllDetectionResults
+      responses:
+        200:
+          description: List of results
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Results'
         500:
-          description: could not store the observable in the database.
-  /account_name/all:
+          description: Server error when retrieving results.
+          content: {}
+  /hitec/repository/concepts/dataset/all:
     get:
-      summary: returns a list of strings containing all twitter profile names for which tweets are collected.
-      description: returns a list of strings containing all twitter profile names for which tweets are collected.
-      operationId: getAllTwitterAccountNames
-      produces:
-        - application/json
+      summary: Get all datasets.
+      description: Get all datasets.
+      operationId: getAllDatasets
       responses:
         200:
-          description: list of twitter profile names.
-          schema:
-            type: array
-            items:
-              type: string
-  /account_name/{account_name}/class/{tweet_class}:
+          description: List of datasets
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Datasets'
+        500:
+          description: Server error when retrieving datasets.
+          content: {}
+  /hitec/repository/concepts/dataset/name/dataset:
     get:
-      summary: Get all tweets belonging to the given class of the given twitter profile.
-      description: Get all tweets belonging to the given class of the given twitter profile.
-      operationId: getTweetOfClass
-      parameters:
-        - name: account_name
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
-        - name: tweet_class
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
+      summary: Get a dataset by name
+      description: Get a dataset by name.
+      operationId: getDataset
       responses:
         200:
-          description: list of tweets.
-          schema:
-            $ref: "#/definitions/Tweets"
+          description: Dataset with matching name or empty dataset.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dataset'
         400:
-          description: bad input parameter or no tweet could be retrieved.
-  /account_name/{account_name}/all:
-    get:
-      summary: Get all tweets belonging to the given twitter profile.
-      description: Get all tweets belonging to the given twitter profile.
-      operationId: getAllTweetsOfAccount
-      parameters:
-        - name: account_name
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
-      responses:
-        200:
-          description: list of tweets.
-          schema:
-            $ref: "#/definitions/Tweets"
-        400:
-          description: bad input parameter or no tweet could be retrieved.
-  /account_name/{account_name}/all/unlabeled:
-    get:
-      summary: Get all tweets belonging to the given twitter profile that are not labeled by a human.
-      description: Get all tweets belonging to the given twitter profile that are not labeled by a human.
-      operationId: getAllUnlabeledTweetsOfAccount
-      parameters:
-        - name: account_name
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
-      responses:
-        200:
-          description: list of tweets.
-          schema:
-            $ref: "#/definitions/Tweets"
-        400:
-          description: bad input parameter or no tweet could be retrieved.
-  /account_name/{account_name}/lang/{lang}/unclassified:
-    get:
-      summary: Get all tweets belonging to the given twitter profile which had not ben classified yet.
-      description: Get all tweets belonging to the given twitter profile which had not ben classified yet.
-      operationId: getAllUnclassifiedTweetsOfAccount
-      parameters:
-        - name: account_name
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
-        - name: lang
-          in: path
-          description: the language the tweets are written in.
-          required: true
-          type: string
-      responses:
-        200:
-          description: list of tweets.
-          schema:
-            $ref: "#/definitions/Tweets"
-        400:
-          description: bad input parameter or no tweet could be retrieved.
-  /account_name/{account_name}/currentweek:
-    get:
-      summary: Get all tweets of the current week belonging to the given twitter profile.
-      description: Get all tweets of the current week belonging to the given twitter profile.
-      operationId: getAllTweetsOfAccountForCurrentWeek
-      parameters:
-        - name: account_name
-          in: path
-          description: the unique account name of a twitter user.
-          required: true
-          type: string
-      responses:
-        200:
-          description: list of tweets.
-          schema:
-            $ref: "#/definitions/Tweets"
-        400:
-          description: bad input parameter or no tweet could be retrieved.
-  /observables:
-    get:
-      summary: Get all twitter profiles under observation.
-      description: Get all twitter profiles under observation.
-      operationId: getObservablesTwitter
-      produces:
-        - application/json
-      responses:
-        200:
-          description: observable twitter profiles.
-          schema:
-            $ref: "#/definitions/ObservablesTwitter"
-        400:
-          description: bad input parameter or no tweet could be retrieved.
+          description: Bad input parameter.
+          content: {}
     delete:
-      summary: Get all twitter profiles under observation.
-      description: Get all twitter profiles under observation.
-      operationId: deleteObservableTwitter
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: observable
-          required: true
-          schema:
-            $ref: "#/definitions/ObservableTwitter"
+      summary: Delete a dataset by name
+      description: Delete a dataset by name.
+      operationId: deleteDataset
       responses:
         200:
-          description: observable successfully deleted.
+          description: Dataset successfully deleted.
+          content: {}
         400:
-          description: bad input parameter or could not delete observable.
-definitions:
-  Tweets:
-    type: array
-    items:
-      $ref: "#/definitions/Tweet"
-  Tweet:
-    type: object
-    properties:
-      created_at:
-        type: integer
-        example: 20181201
-      favorite_count:
-        type: integer
-        example: 1
-      retweet_count:
-        type: integer
-        example: 1
-      status_id:
-        type: string
-        example: "933476766408200193"
-      in_reply_to_screen_name:
-        type: string
-        example: musteraccount
-      lang:
-        type: string
-        example: en
-      text:
-        type: string
-        example: "@maxmustermannThanks for your message!"
-      user_name:
-        type: string
-        example: maxmustermann
-      sentiment:
-        type: string
-        example: NEUTRAL
-      sentiment_score:
-        type: integer
-        example: -1
-      tweet_class:
-        type: string
-        example: problem_report
-  TweetLabel:
-    type: object
-    properties:
-      status_id:
-        type: string
-        example: "933476766408200193"
-      date:
-        type: integer
-        example: 20181231
-      label:
-        type: string
-        example: "problem_report"
-      previous_label:
-        type: string
-        example: "inquiry"
-  ObservablesTwitter:
-    type: array
-    items:
-      $ref: "#/definitions/ObservableTwitter"
-  ObservableTwitter:
-    type: object
-    properties:
-      account_name:
-        type: string
-        example: mustermann
-      interval:
-        type: string
-        example: daily
-      lang:
-        type: string
-        example: en
+          description: Bad input parameter or could not delete dataset.
+          content: {}
+  /hitec/repository/concepts/detection/result/result:
+    delete:
+      summary: Delete result with timestamp
+      description: Delete result with timestamp.
+      operationId: deleteResult
+      responses:
+        200:
+          description: Result successfully deleted.
+          content: {}
+        400:
+          description: Bad input parameter or could not delete result.
+          content: {}
+components:
+  schemas:
+    Datasets:
+      type: array
+      items:
+        $ref: '#/components/schemas/Dataset'
+    Results:
+      type: array
+      items:
+        $ref: '#/components/schemas/Result'
+    Dataset:
+      type: object
+      properties:
+        uploaded_at:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        ground_truth:
+          type: array
+          items:
+            $ref: '#/components/schemas/TruthElement'
+    Result:
+      type: object
+      properties:
+        method:
+          type: string
+        status:
+          type: string
+        started_at:
+          type: string
+        name:
+          type: string
+        dataset_name:
+          type: string
+        params:
+          type: object
+        topics:
+          type: object
+        doc_topic:
+          type: object
+        metrics:
+          type: object
+    TruthElement:
+      type: object
+      properties:
+        id:
+          type: string
+        value:
+          type: string
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        number:
+          type: integer
+
