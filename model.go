@@ -2,7 +2,6 @@ package main
 
 import (
 	"gopkg.in/validator.v2"
-	"src/gopkg.in/validator.v2"
 	"time"
 )
 

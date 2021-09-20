@@ -3,3 +3,4 @@ rest_test/*
 .scannerwork/*
 sequence_diagram.*
 rest_test.http
+/.idea/
