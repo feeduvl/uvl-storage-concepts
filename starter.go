@@ -41,6 +41,7 @@ func makeRouter() *mux.Router {
 	// Insert
 	router.HandleFunc("/hitec/repository/concepts/store/dataset/", postDataset).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
 	//router.HandleFunc("/hitec/repository/twitter/access_key", postCheckAccessKey).Methods("POST")
 	//router.HandleFunc("/hitec/repository/twitter/access_key/update", postUpdateAccessKeyConfiguration).Methods("POST")
 
@@ -55,6 +56,35 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
 
 	return router
+}
+
+
+//  store an existing annotation
+func postAnnotation(w http.ResponseWriter, r *http.Request) {
+	var annotation Annotation
+	err := json.NewDecoder(r.Body).Decode(&annotation)
+
+	fmt.Printf("postAnnotation called. Annotation: %s\n", annotation.Name)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertAnnotation(m, annotation)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func postDataset(w http.ResponseWriter, r *http.Request) {

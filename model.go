@@ -2,8 +2,49 @@ package main
 
 import (
 	"gopkg.in/validator.v2"
+	"src/gopkg.in/validator.v2"
 	"time"
 )
+
+// The Annotation model
+
+type RelationshipNameKey struct {
+	Index int `json:"index" bson:"index"`
+	RelationshipName string `json:"relationship_name" bson:"relationship_name"`
+}
+
+type ClusterRelationship struct {
+	TokenClusters []int `json:"token_clusters" bson:"token_clusters"`
+	RelationshipNames []RelationshipNameKey `json:"relationship_names" bson:"relationship_names"`
+	Index int `json:"index" bson:"index"`
+}
+
+type TokenCluster struct {
+	Tokens []int `json:"tokens" bson:"tokens"`
+	Name string `json:"name" bson:"name"`
+	Tore string `json:"tore" bson:"tore"`
+	Index int `json:"index" bson:"index"`
+	RelationshipMemberships []int `json:"relationship_memberships" bson:"relationship_memberships"`
+}
+
+type Token struct {
+	Index int `json:"index" bson:"index"`
+	Name string `validate:"nonzero" json:"name" bson:"name"`
+	Lemma string `validate:"nonzero" json:"lemma" bson:"lemma"`
+	Pos string `validate:"nonzero" json:"pos" bson:"pos"`
+	TokenCluster int `json:"token_cluster" bson:"token_cluster"`
+}
+
+type Annotation struct {
+	UploadedAt time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
+	Name string `validate:"nonzero" json:"name" bson:"name"`
+
+	Tokens []Token `json:"tokens" bson:"tokens"`
+	TokenClusters []TokenCluster `json:"token_clusters" bson:"token_clusters"`
+	ClusterRelationships []ClusterRelationship `json:"cluster_relationships" bson:"cluster_relationships"`
+}
+
+// end Annotation model
 
 // Dataset model
 type Dataset struct {

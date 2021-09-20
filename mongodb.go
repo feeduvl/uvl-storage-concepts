@@ -69,6 +69,21 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 
 }
 
+
+// MongoInsertAnnotation returns ok if the dataset was inserted or already existed
+func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) error {
+	query := bson.M{fieldDatasetName: annotation.Name}
+	update := bson.M{"$set": annotation}
+	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
 func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
@@ -82,6 +97,17 @@ func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	return nil
 }
 
+
+// MongoDeleteAnnotation return ok if db entry could be deleted
+func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation Annotation) bool {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		RemoveAll(bson.M{fieldDatasetName: annotation.Name})
+
+	return err == nil
+}
+
 // MongoDeleteDataset return ok if db entry could be deleted
 func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 	_, err := mongoClient.
@@ -91,6 +117,24 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 
 	return err == nil
 }
+
+
+// MongoGetAnnotation returns an Annotation
+func MongoGetAnnotation(mongoClient *mgo.Session, annotation Annotation) Dataset {
+	var dataset []Dataset
+	err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		Find(bson.M{fieldDatasetName: annotation.Name}).
+		All(&dataset)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return dataset[0]
+}
+
 
 // MongoGetDataset returns a dataset
 func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
@@ -107,6 +151,30 @@ func MongoGetDataset(mongoClient *mgo.Session, datasetName string) Dataset {
 
 	return dataset[0]
 }
+
+
+
+// MongoGetAllAnnotations get all annotations
+func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
+
+	var annotationNames []string
+
+	err := mongoClient.
+		DB(database).
+		C(collectionDataset).
+		Find(nil).
+		Distinct(fieldDatasetName, &annotationNames)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	fmt.Printf("getAllDatasets result: %s\n", annotationNames)
+
+	return annotationNames
+}
+
 
 // MongoGetAllDatasets returns a dataset
 func MongoGetAllDatasets(mongoClient *mgo.Session) []string {
