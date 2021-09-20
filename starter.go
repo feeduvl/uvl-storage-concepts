@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gopkg.in/mgo.v2"
 	"log"
 	"net/http"
 	"os"
-
-	"gopkg.in/mgo.v2"
+	"strings"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -21,8 +21,7 @@ const (
 var mongoClient *mgo.Session
 
 func main() {
-	// log.SetOutput(os.Stdout)
-	mongoClient = MongoGetSession(os.Getenv("MONGO_IP"), os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"))
+	mongoClient = MongoGetSession(os.Getenv("MONGO_IP"), os.Getenv("MONGO_USERNAME"), os.Getenv("MONGO_PASSWORD"), database)
 	MongoCreateCollectionIndexes(mongoClient)
 
 	allowedHeaders := handlers.AllowedHeaders([]string{"X-Requested-With"})
@@ -40,22 +39,29 @@ func makeRouter() *mux.Router {
 
 	// Insert
 	router.HandleFunc("/hitec/repository/concepts/store/dataset/", postDataset).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/groundtruth/", postAddGroundTruth).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
-	//router.HandleFunc("/hitec/repository/twitter/access_key", postCheckAccessKey).Methods("POST")
-	//router.HandleFunc("/hitec/repository/twitter/access_key/update", postUpdateAccessKeyConfiguration).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
-	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", getDetectionResult).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
-	//router.HandleFunc("/hitec/repository/twitter/access_key/configuration", postAccessKeyConfiguration).Methods("POST")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", deleteResult).Methods("DELETE")
 
 	return router
+}
+
+func handleErrorWithRequest(err error, w http.ResponseWriter) {
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
 }
 
 
@@ -88,34 +94,29 @@ func postAnnotation(w http.ResponseWriter, r *http.Request) {
 }
 
 func postDataset(w http.ResponseWriter, r *http.Request) {
+
 	var dataset Dataset
 	err := json.NewDecoder(r.Body).Decode(&dataset)
-
-	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
-
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
+	fmt.Printf("postDataset called. Dataset: %s\n", dataset.Name)
 
 	// validate dataset
 	err = validateDataset(dataset)
 	if err != nil {
 		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	// insert data into the db
 	m := mongoClient.Copy()
 	defer m.Close()
 	err = MongoInsertDataset(m, dataset)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
+	handleErrorWithRequest(err, w)
 
 	// send response
 	w.WriteHeader(http.StatusOK)
@@ -124,19 +125,109 @@ func postDataset(w http.ResponseWriter, r *http.Request) {
 
 func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 
-	//
-	var data Dataset
-	err := json.NewDecoder(r.Body).Decode(&data)
+	// parse request
+	var result Result
+	err := json.NewDecoder(r.Body).Decode(&result)
 	if err != nil {
 		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
-	//
-	json.NewEncoder(w).Encode(ResponseMessage{Message: "everything ok", Status: true})
+	fmt.Printf("postDetectionResult called. Method: %s, Time: %s \n", result.Method, result.StartedAt)
+
+	// validate result
+	err = validateResult(result)
+	if err != nil {
+		fmt.Printf("ERROR validating json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertResult(m, result)
+	handleErrorWithRequest(err, w)
+
+	// send response
 	w.WriteHeader(http.StatusOK)
-	return
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func postUpdateResultName(w http.ResponseWriter, r *http.Request) {
+
+	// parse request
+	var result Result
+	err := json.NewDecoder(r.Body).Decode(&result)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("postUpdateResultName called. Name: %s, Time: %s \n", result.Name, result.StartedAt)
+
+	// retrieve result
+	m := mongoClient.Copy()
+	defer m.Close()
+	res := MongoGetResult(m, result.StartedAt)
+
+	if res.Status != "finished" && res.Status != "failed" {
+		fmt.Printf("ERROR: can not change name for result with status: %s\n", res.Status)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	res.Name = result.Name
+
+	// insert updated result
+	err = MongoInsertResult(m, res)
+	handleErrorWithRequest(err, w)
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func postAddGroundTruth(w http.ResponseWriter, r *http.Request) {
+
+	// parse request
+	var dataset Dataset
+	err := json.NewDecoder(r.Body).Decode(&dataset)
+	if err != nil {
+		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("postAddGroundTruth called. Dataset Name: %s. \n", dataset.Name)
+
+	// retrieve dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	data := MongoGetDataset(m, dataset.Name)
+
+	if data.Name != dataset.Name {
+		fmt.Printf("Error adding groundtruth, dataset does not exist.\n")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if dataset.Name == "" {
+		fmt.Printf("Error adding groundtruth, datset name invalid.\n")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	data.GroundTruth = dataset.GroundTruth
+
+	// insert updated result
+	err = MongoInsertDataset(m, data)
+	handleErrorWithRequest(err, w)
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
 
 func getDataset(w http.ResponseWriter, r *http.Request) {
@@ -154,12 +245,12 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dataset)
+	_ = json.NewEncoder(w).Encode(dataset)
 }
 
-func getAllDatasets(w http.ResponseWriter, r *http.Request) {
+func getAllDatasets(w http.ResponseWriter, _ *http.Request) {
 
-	fmt.Printf("REST call: getAllDatasets")
+	fmt.Printf("REST call: getAllDatasets\n")
 
 	// retrieve all dataset names
 	m := mongoClient.Copy()
@@ -169,19 +260,23 @@ func getAllDatasets(w http.ResponseWriter, r *http.Request) {
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(datasets)
+	_ = json.NewEncoder(w).Encode(datasets)
 
 }
 
-func getDetectionResult(w http.ResponseWriter, r *http.Request) {
+func getAllDetectionResults(w http.ResponseWriter, _ *http.Request) {
 
-	//
+	fmt.Printf("REST call: getAllDetectionResults\n")
 
-}
+	// retrieve all Results
+	m := mongoClient.Copy()
+	defer m.Close()
+	results := MongoGetAllResults(m)
 
-func getAllDetectionResults(w http.ResponseWriter, r *http.Request) {
-
-	//
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(results)
 
 }
 
@@ -200,96 +295,44 @@ func deleteDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	if ok {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Dataset successfully deleted", Status: true})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Dataset successfully deleted", Status: true})
 		return
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete dataset", Status: false})
 	}
 }
 
-/*
-func getTweetOfClass(w http.ResponseWriter, r *http.Request) {
-	// get request param
-	params := mux.Vars(r)
-	tweetedToName := params["account_name"]
-	tweetClass := params["tweet_class"]
+func deleteResult(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("params: ", tweetedToName, tweetClass)
+	params := mux.Vars(r)
+	result := params["result"]
+
+	fmt.Printf("REST call: deleteResult - %s\n", result)
+
+	_t := "{\"date\": \"" + result + "\"}"
+	// parse time
+	var t Date
+	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, result)
+		return
+	}
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	tweets := MongoGetTweetOfClass(m, tweetedToName, tweetClass)
+	ok := MongoDeleteResult(m, t.Date)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tweets)
-}
-
-func postCheckAccessKey(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Printf("REST call (postCheckAccessKey)\n")
-
-	// insert data into the db
-	m := mongoClient.Copy()
-	defer m.Close()
-	accessKeyExists := MongoGetAccessKeyExists(m, accessKey)
-
-	// send response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(ResponseMessage{Message: "access key status", Status: accessKeyExists})
-}
-
-func postUpdateAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Printf("REST call (postUpdateAccessKeyConfiguration) %s\n", accessKey)
-
-	// insert data into the db
-	m := mongoClient.Copy()
-	defer m.Close()
-	MongoUpdateAccessKeyConfiguration(m, accessKey)
-
-	// send response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-}
-
-func postAccessKeyConfiguration(w http.ResponseWriter, r *http.Request) {
-	var accessKey AccessKey
-	err := json.NewDecoder(r.Body).Decode(&accessKey)
-	if err != nil {
-		fmt.Printf("ERROR: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	m := mongoClient.Copy()
-	defer m.Close()
-
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	accessKeyExists := MongoGetAccessKeyExists(m, accessKey)
-	if !accessKeyExists {
-		w.WriteHeader(http.StatusBadRequest)
-	} else {
-		accessKeyConfiguration := MongoGetAccessKeyConfiguration(m, accessKey)
+	if ok {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(accessKeyConfiguration)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Result successfully deleted", Status: true})
+		return
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
 }
-*/

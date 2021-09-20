@@ -6,29 +6,24 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/mgo.v2/dbtest"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strconv"
-	"testing"
 	"time"
 
 	"github.com/gorilla/mux"
-
-	"gopkg.in/mgo.v2/dbtest"
+	"testing"
 )
 
 var router *mux.Router
 var mockDBServer dbtest.DBServer
-var tweets []Tweet
-var invalidTweet Tweet
-var existingAccessKey AccessKey
-var notExistingAccessKey AccessKey
-var invalidArrayPayload []byte
+var documents []Document
+var ti = time.Now()
 var invalidObjectPayload []byte
+var invalidPayloadString = "payload"
 
-/*
 func TestMain(m *testing.M) {
 	fmt.Println("--- Start Tests")
 	setup()
@@ -40,13 +35,12 @@ func TestMain(m *testing.M) {
 
 	// call with result of m.Run()
 	os.Exit(retCode)
-}*/
+}
 
 func setup() {
 	fmt.Println("--- --- setup")
 	setupRouter()
 	setupDB()
-	fillDB()
 }
 
 func setupRouter() {
@@ -61,143 +55,60 @@ func setupDB() {
 	MongoCreateCollectionIndexes(mongoClient)
 }
 
-func fillDB() {
-	/*
-	 * Insert fake tweets
-	 */
-	fmt.Println("Insert fake tweets")
-	tweets = append(tweets, Tweet{
-		CreatedAt:           20180121,
-		CreatedAtFull:       "Mon Jan 21 12:28:28 +0000 2019",
-		FavoriteCount:       0,
-		RetweetCount:        0,
-		Text:                "@Tre_It complimenti per Luca, un vostro collaboratore che lavora presso MediaWord di Cinisello Balsamo. Una persona attenta, precisa e sempre disponibile nei confronti dei clienti. #bellapersona",
-		StatusID:            "1",
-		UserName:            "nytwitt",
-		InReplyToScreenName: "Tre_It",
-		Hashtags:            []string{"bellapersona"},
-		Lang:                "it",
-		Sentiment:           "NEUTRAL",
-		SentimentScore:      0,
-		TweetClass:          "irrelevant",
-		ClassifierCertainty: 0,
+func addDatasets() {
+
+	documents = append(documents, Document{
+		Id:   "0",
+		Text: "Text 1",
 	})
-	tweets = append(tweets, Tweet{
-		CreatedAt:           20180121,
-		CreatedAtFull:       "Mon Jan 21 12:28:28 +0000 2019",
-		FavoriteCount:       0,
-		RetweetCount:        0,
-		Text:                "@WindItalia complimenti per Luca, un vostro collaboratore che lavora presso MediaWord di Cinisello Balsamo. Una persona attenta, precisa e sempre disponibile nei confronti dei clienti. #bellapersona",
-		StatusID:            "2",
-		UserName:            "katast",
-		InReplyToScreenName: "WindItalia",
-		Hashtags:            []string{"bellapersona"},
-		Lang:                "it",
-		Sentiment:           "NEUTRAL",
-		SentimentScore:      0,
-		TweetClass:          "problem_report",
-		ClassifierCertainty: 0,
+	documents = append(documents, Document{
+		Id:   "1",
+		Text: "Text 2",
 	})
-	tweets = append(tweets, Tweet{
-		CreatedAt:           20180121,
-		CreatedAtFull:       "Mon Jan 21 12:28:28 +0000 2019",
-		FavoriteCount:       0,
-		RetweetCount:        0,
-		Text:                "@Tre_It complimenti per Luca, un vostro collaboratore che lavora presso MediaWord di Cinisello Balsamo. Una persona attenta, precisa e sempre disponibile nei confronti dei clienti. #bellapersona",
-		StatusID:            "3",
-		UserName:            "creat",
-		InReplyToScreenName: "Tre_It",
-		Hashtags:            []string{"bellapersona"},
-		Lang:                "it",
-		Sentiment:           "NEUTRAL",
-		SentimentScore:      0,
-		TweetClass:          "",
-		ClassifierCertainty: 0,
+	documents = append(documents, Document{
+		Id:   "2",
+		Text: "Text 3",
 	})
-	dateOfCurrentWeek, _ := strconv.Atoi(time.Now().AddDate(0, 0, -5).Format("20060102"))
-	tweets = append(tweets, Tweet{
-		CreatedAt:           dateOfCurrentWeek,
-		CreatedAtFull:       "Mon Jan 21 12:28:28 +0000 2019",
-		FavoriteCount:       0,
-		RetweetCount:        0,
-		Text:                "@Tre_It complimenti per Luca, un vostro collaboratore che lavora presso MediaWord di Cinisello Balsamo. Una persona attenta, precisa e sempre disponibile nei confronti dei clienti. #bellapersona",
-		StatusID:            "4",
-		UserName:            "charl",
-		InReplyToScreenName: "Tre_It",
-		Hashtags:            []string{"bellapersona"},
-		Lang:                "it",
-		Sentiment:           "NEUTRAL",
-		SentimentScore:      0,
-		TweetClass:          "inquiry",
-		ClassifierCertainty: 0,
-	})
-
-	tweetBulk := mongoClient.DB(database).C(collectionTweet).Bulk()
-	for _, tweet := range tweets {
-		tweetBulk.Insert(tweet)
-	}
-	_, err := tweetBulk.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	invalidTweet = Tweet{}
-	invalidArrayPayload = []byte(`[{ "wrong_json_format": true }]`)
-	invalidObjectPayload = []byte(`{ "wrong_json_format": true }`)
-
-	notExistingAccessKey = AccessKey{
-		Key: "notindb",
-		Configuration: AccessKeyConfiguration{
-			TwitterAccounts:         []string{"Tre_It"},
-			GooglePlayStoreAccounts: []string{},
-			Topics:                  []string{"Network"},
-		},
-	}
-
-	existingAccessKey = AccessKey{
-		Key: "indb",
-		Configuration: AccessKeyConfiguration{
-			TwitterAccounts:         []string{"Tre_It"},
-			GooglePlayStoreAccounts: []string{"Wind Tre S.p.A."},
-			Topics:                  []string{"Contract", "Devices"},
-		},
-	}
-
-	err = mongoClient.DB(database).C(collectionAccessKeys).Insert(existingAccessKey)
-	if err != nil {
-		panic(err)
-	}
 
 	/*
-	 * Insert fake observables
+	 * Insert fake datasets
 	 */
-	err = mongoClient.DB(database).C(collectionObservableTwitter).Insert(ObservableTwitter{
-		AccountName: "TestObserverable",
-		Interval:    "2h",
-		Lang:        "en",
+	err := mongoClient.DB(database).C(collectionDataset).Insert(Dataset{
+		UploadedAt: time.Now(),
+		Name:       "test_dataset_1",
+		Size:       3,
+		Documents:  documents,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	/*
-	 * Insert fake labels
-	 */
-	err = mongoClient.DB(database).C(collectionTweetLabel).Insert(TweetLabel{
-		Date:          20180118,
-		Label:         "problem_report",
-		PreviousLabel: "problem_report",
-		StatusID:      "4",
+	err = mongoClient.DB(database).C(collectionDataset).Insert(Dataset{
+		UploadedAt: time.Now(),
+		Name:       "test_dataset_2",
+		Size:       3,
+		Documents:  documents,
 	})
 	if err != nil {
 		panic(err)
 	}
+
+	err = mongoClient.DB(database).C(collectionDataset).Insert(Dataset{
+		UploadedAt: time.Now(),
+		Name:       "test_dataset_3",
+		Size:       3,
+		Documents:  documents,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 }
 
 func tearDown() {
 	fmt.Println("--- --- tear down")
-	mongoClient.Close()
-	mockDBServer.Stop() // Stop shuts down the temporary server and removes data on disk.
+	//mongoClient.Close()
+	mockDBServer.Stop()
 }
 
 type endpoint struct {
@@ -259,250 +170,242 @@ func assertJsonDecodes(t *testing.T, rr *httptest.ResponseRecorder, v interface{
 	}
 }
 
-func TestPostTweet(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/store/tweet/"}
-	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
-	assertFailure(t, ep.mustExecuteRequest(invalidTweet))
-	assertSuccess(t, ep.mustExecuteRequest(tweets))
-}
+func TestPostDataset(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/concepts/store/dataset/"}
 
-func TestPostClassifiedTweet(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/store/classified/tweet/"}
-	assertFailure(t, ep.mustExecuteRequest(invalidArrayPayload))
-	assertFailure(t, ep.mustExecuteRequest(invalidTweet))
+	documents = append(documents, Document{
+		Id:   "0",
+		Text: "Text 1",
+	})
+	documents = append(documents, Document{
+		Id:   "1",
+		Text: "Text 2",
+	})
+	documents = append(documents, Document{
+		Id:   "2",
+		Text: "Text 3",
+	})
 
-	tweet := tweets[0]
-	tweet.TweetClass = "problem_report"
-	tweet.ClassifierCertainty = 80 // TODO
-	tweet.Sentiment = "NEGATIVE"
-	tweet.SentimentScore = -2
-	assertSuccess(t, ep.mustExecuteRequest([]Tweet{tweet}))
-}
-
-func TestPostObservableTwitter(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/store/observable/"}
-
-	// Test for failure
-	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
-	assertFailure(t, ep.mustExecuteRequest(ObservableTwitter{
-		AccountName: "Test",
-		Interval:    "2h",
-	}))
-
-	// Test for success
-	correctObservable := ObservableTwitter{
-		AccountName: "Test",
-		Interval:    "2h",
-		Lang:        "en",
+	validDatasetPayload := Dataset{
+		UploadedAt: time.Now(),
+		Name:       "test_dataset_5",
+		Size:       3,
+		Documents:  documents,
 	}
-	assertSuccess(t, ep.mustExecuteRequest(correctObservable))
 
-	MongoDeleteObservableTwitter(mongoClient, correctObservable)
-}
+	// Test with normal dataset
+	assertSuccess(t, ep.mustExecuteRequest(validDatasetPayload))
 
-func TestPostLabelTwitter(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/label/tweet/"}
+	d := MongoGetAllDatasets(mongoClient)
+	assert.Len(t, d, 1)
 
-	// Test for failure
+	// Test with exising dataset name
+	assertSuccess(t, ep.mustExecuteRequest(validDatasetPayload))
+
+	d = MongoGetAllDatasets(mongoClient)
+	assert.Len(t, d, 1)
+
+	MongoDeleteDataset(mongoClient, "test_dataset_5")
+
+	// Test invalid payload
 	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
-	assertFailure(t, ep.mustExecuteRequest(TweetLabel{}))
+	assertFailure(t, ep.mustExecuteRequest(invalidPayloadString))
 
-	// Test for success
-	tweetLabel := TweetLabel{
-		Date:          20190131,
-		Label:         "problem_report",
-		PreviousLabel: "problem_report",
-		StatusID:      "1234",
+	// Test dataset with invalid document
+	documents = append(documents, Document{
+		Id:   "",
+		Text: "",
+	})
+
+	invalidDatasetPayload := Dataset{
+		UploadedAt: time.Now(),
+		Name:       "test_dataset_5",
+		Size:       4,
+		Documents:  documents,
 	}
-	assertSuccess(t, ep.mustExecuteRequest(tweetLabel))
-
-	err := mongoClient.DB(database).C(collectionTweetLabel).Remove(tweetLabel)
-	assert.NoError(t, err, "Could not remove tweet label fro db")
+	assertFailure(t, ep.mustExecuteRequest(invalidDatasetPayload))
 }
 
-func TestPostTweetTopics(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/store/topics"}
+func TestPostDetectionResult(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/concepts/store/detection/result/"}
 
-	// Test for failure
-	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
-
-	// Test for success
-	tweet := tweets[0]
-	tweet.Topics = TweetTopics{
-		FirstClass: TweetClass{
-			Label: "Network",
-			Score: 0.3,
-		},
-		SecondClass: TweetClass{
-			Label: "Devices",
-			Score: 0.6,
-		},
+	// Test with normal result
+	res := Result{
+		Method:      "lda",
+		Status:      "finished",
+		StartedAt:   ti,
+		DatasetName: "test_dataset_2",
+		Name:        "test_result",
 	}
-	assertSuccess(t, ep.mustExecuteRequest(tweet))
-}
+	assertSuccess(t, ep.mustExecuteRequest(res))
 
-func TestPostCheckAccessKey(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/access_key"}
+	resFail := Result{
+		Method:      "",
+		Status:      "",
+		DatasetName: "test",
+		Name:        "test_result_fail",
+	}
+	// Test with some value missing
+	assertFailure(t, ep.mustExecuteRequest(resFail))
 
-	// Test for failure
 	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+	assertFailure(t, ep.mustExecuteRequest(invalidPayloadString))
 
-	// Test for success
-	response := ep.mustExecuteRequest(existingAccessKey)
-	var message ResponseMessage
-	assertJsonDecodes(t, response, &message)
-	assert.True(t, message.Status)
-
-	response = ep.mustExecuteRequest(notExistingAccessKey)
-	assertJsonDecodes(t, response, &message)
-	assert.False(t, message.Status)
 }
 
-func TestPostUpdateAccessKeyConfiguration(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/access_key/update"}
+func TestPostUpdateResultName(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/concepts/store/detection/result/name"}
+	// Test with normal Result
+	res := Result{
+		StartedAt: ti,
+		Name:      "new_name",
+	}
 
-	// Test for failure
+	assertSuccess(t, ep.mustExecuteRequest(res))
+
+	// Test with non-existent result
+	resFail := Result{
+		StartedAt: time.Now(),
+		Name:      "new_name",
+	}
+	assertFailure(t, ep.mustExecuteRequest(resFail))
+
 	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
+	assertFailure(t, ep.mustExecuteRequest(invalidPayloadString))
 
-	// Test for success
-	key := existingAccessKey
-	key.Configuration.Topics = []string{"Contract", "Network"}
-	assertSuccess(t, ep.mustExecuteRequest(key))
 }
 
-func TestGetTweetOfClass(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/class/%s"}
+func TestGetAllDatasets(t *testing.T) {
+	ep := endpoint{"GET", "/hitec/repository/concepts/dataset/all"}
 
-	// Test for failure
-	response := ep.withVars("should", "fail").mustExecuteRequest(nil)
-	var content []Tweet
+	// Test with no datasets
+	response := ep.mustExecuteRequest(nil)
+	var content []string
 	assertJsonDecodes(t, response, &content)
 	assert.Empty(t, content)
 
-	// Test for success
-	response = ep.withVars("WindItalia", "problem_report").mustExecuteRequest(nil)
-	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content, 1)
-}
+	addDatasets()
 
-func TestGetAllTweetsOfAccount(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/all"}
-
-	// Test for failure
-	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
-	var content []Tweet
-	assertJsonDecodes(t, response, &content)
-	assert.Empty(t, content)
-
-	// Test for success
-	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
+	// Test normal
+	response = ep.mustExecuteRequest(nil)
 	assertJsonDecodes(t, response, &content)
 	assert.Len(t, content, 3)
 }
 
-func TestGetAllUnlabeledTweetsOfAccount(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/all/unlabeled"}
+func TestGetDataset(t *testing.T) {
 
-	// Test for failure
-	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
-	assertFailure(t, response)
-
-	// Test for success
-	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
-	var content []Tweet
-	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content, 2)
-}
-
-func TestGetAllTweetsOfAccountForCurrentWeek(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/currentweek"}
-
-	// Test for failure
-	response := ep.withVars("shouldfail").mustExecuteRequest(nil)
-	var content []Tweet
-	assertJsonDecodes(t, response, &content)
-	assert.Empty(t, content)
-
-	// Test for success
-	response = ep.withVars("Tre_It").mustExecuteRequest(nil)
-	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content, 1)
-}
-
-func TestGetAllUnclassifiedTweetsOfAccount(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/%s/lang/%s/unclassified"}
-
-	// Test for success
-	response := ep.withVars("Tre_It", "it").mustExecuteRequest(nil)
-	var tweets []Tweet
-	assertJsonDecodes(t, response, &tweets)
-	assert.Len(t, tweets, 1)
-}
-
-func TestGetAllTwitterAccountNames(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/account_name/all"}
-
-	// Test for success
+	// Test normal
+	ep := endpoint{"GET", "/hitec/repository/concepts/dataset/name/test_dataset_2"}
 	response := ep.mustExecuteRequest(nil)
-	var content TwitterAccount
+	var content Dataset
 	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content.Names, 2)
+	assert.Equal(t, content.Name, "test_dataset_2")
+	assert.Len(t, content.Documents, 7)
+
+	// Test non-existent dataset
+	ep = endpoint{"GET", "/hitec/repository/concepts/dataset/name/test_dataset_4"}
+	response = ep.mustExecuteRequest(nil)
+	assertJsonDecodes(t, response, &content)
+	assert.NotEqual(t, content.Name, "test_dataset_4")
+
 }
 
-func TestGetAllLabeledTweets(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/labeledtweets/all"}
+func TestPostAddGroundtruth(t *testing.T) {
+	ep := endpoint{"POST", "/hitec/repository/concepts/store/groundtruth/"}
+	// Test with normal groundtruth
+	var gt []TruthElement
+	d := Dataset{
+		Name:        "test_dataset_2",
+		GroundTruth: gt,
+	}
+	assertSuccess(t, ep.mustExecuteRequest(d))
 
-	// Test for success
-	response := ep.mustExecuteRequest(nil)
-	var content []TweetLabel
-	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content, 1)
-}
+	d.Name = "test_dataset_99"
+	// Test with wrong dataset name
+	assertFailure(t, ep.mustExecuteRequest(d))
 
-func TestGetObservablesTwitter(t *testing.T) {
-	ep := endpoint{"GET", "/hitec/repository/twitter/observables"}
-
-	// Test for success
-	response := ep.mustExecuteRequest(nil)
-	var content []TweetLabel
-	assertJsonDecodes(t, response, &content)
-	assert.Len(t, content, 1)
-}
-
-func TestPostAccessKeyConfiguration(t *testing.T) {
-	ep := endpoint{"POST", "/hitec/repository/twitter/access_key/configuration"}
 	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
-
-	notExistingKeyBody := map[string]string{"access_key": notExistingAccessKey.Key}
-	assertFailure(t, ep.mustExecuteRequest(notExistingKeyBody))
-
-	existingKeyBody := map[string]string{"access_key": existingAccessKey.Key}
-	assertSuccess(t, ep.mustExecuteRequest(existingKeyBody))
-	response := ep.mustExecuteRequest(existingKeyBody)
-	assertSuccess(t, response)
-	var config AccessKeyConfiguration
-	assertJsonDecodes(t, response, &config)
+	assertFailure(t, ep.mustExecuteRequest(invalidPayloadString))
 }
 
-func TestDeleteObservableTwitter(t *testing.T) {
-	ep := endpoint{"DELETE", "/hitec/repository/twitter/observables"}
+func TestGetAllDetectionResults(t *testing.T) {
+	ep := endpoint{"GET", "/hitec/repository/concepts/detection/result/all"}
+	// Test normal
+	response := ep.mustExecuteRequest(nil)
+	var content []Result
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 1)
 
-	// Test for failure
-	assertFailure(t, ep.mustExecuteRequest(invalidObjectPayload))
-	ep.mustExecuteRequest(ObservableTwitter{
-		AccountName: "Test",
-		Interval:    "2h",
+	MongoDeleteResult(mongoClient, ti)
+	// Test with no results
+	response = ep.mustExecuteRequest(nil)
+	assertJsonDecodes(t, response, &content)
+	assert.Len(t, content, 0)
+}
+
+func TestDeleteDataset(t *testing.T) {
+	// Test normal
+	ep := endpoint{"DELETE", "/hitec/repository/concepts/dataset/name/test_dataset_1"}
+	ep.mustExecuteRequest(nil)
+	datasets := MongoGetAllDatasets(mongoClient)
+	assert.Len(t, datasets, 2)
+
+	// Test non-existent dataset
+	ep = endpoint{"DELETE", "/hitec/repository/concepts/dataset/name/test_dataset_4"}
+	ep.mustExecuteRequest(nil)
+	datasets = MongoGetAllDatasets(mongoClient)
+	assert.Len(t, datasets, 2)
+
+}
+
+func TestDeleteResult(t *testing.T) {
+
+	res := Result{
+		Method:      "seanmf",
+		Status:      "finished",
+		StartedAt:   ti.Truncate(time.Millisecond),
+		DatasetName: "test_dataset_2",
+		Name:        "test_result",
+	}
+	_ = MongoInsertResult(mongoClient, res)
+
+	// Test with non-existent result
+	tm := time.Now().Format("2006-01-02T15:04:05Z07:00")
+	ep := endpoint{"DELETE", "/hitec/repository/concepts/detection/result/" + tm}
+	assertSuccess(t, ep.mustExecuteRequest(nil))
+
+	results := MongoGetAllResults(mongoClient)
+	assert.Len(t, results, 1)
+
+	// Test with wrong date format
+	tm = ti.Format("2006-ZZ01-02T15:04:05.000Z07:00")
+	fmt.Println(tm)
+	ep = endpoint{"DELETE", "/hitec/repository/concepts/detection/result/" + tm}
+	assertFailure(t, ep.mustExecuteRequest(nil))
+
+	// Test with normal Result
+	tm = ti.Format("2006-01-02T15:04:05.000Z07:00")
+	fmt.Println(tm)
+	ep = endpoint{"DELETE", "/hitec/repository/concepts/detection/result/" + tm}
+	assertSuccess(t, ep.mustExecuteRequest(nil))
+	results = MongoGetAllResults(mongoClient)
+	assert.Len(t, results, 0)
+}
+
+func TestQueries(t *testing.T) {
+	mongoClient.Close()
+	assert.Panics(t, func() {
+		MongoCreateCollectionIndexes(mongoClient)
 	})
-	observables := MongoGetAllObservableTwitter(mongoClient)
-	assert.Len(t, observables, 1)
+}
 
-	// Test for success
-	assertSuccess(t, ep.mustExecuteRequest(ObservableTwitter{
-		AccountName: "TestObserverable",
-		Interval:    "2h",
-		Lang:        "en",
-	}))
-
-	observables = MongoGetAllObservableTwitter(mongoClient)
-	assert.Empty(t, observables)
+func TestErrorHandler(t *testing.T) {
+	assert.Panics(t, func() {
+		panicError(errors.New("Error"))
+	})
+	assert.NotPanics(t, func() {
+		panicError(nil)
+	})
+	err := handleErrorInsert(errors.New("Error"))
+	assert.Error(t, err)
 }

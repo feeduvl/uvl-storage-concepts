@@ -1,6 +1,12 @@
 == uvl-storage-concepts image:https://img.shields.io/badge/License-EPL%202.0-blue.svg["EPL 2.0", link="https://www.eclipse.org/legal/epl-2.0/"]
 
-README will come soon!
+The uvl-storage-concepts microservice represents an interface to a database persisting all JSON objects related to dataset and detection result data. It can store datasets, groundtruth and detection results provided by link:https://github.com/feeduvl/uvl-orchestration-concepts[uvl-orchestration-concepts]. It also returns the stored data.
+
+This microservice is based on link:https://github.com/feeduvl/ri-storage-twitter[ri-storage-twitter].
+
+== REST API
+
+See link:https://github.com/feeduvl/uvl-storage-concepts/blob/master/swagger.yaml[swagger.yaml] for details. The tool at https://editor.swagger.io/ can be used to render the swagger file.
 
 == License
 Free use of this software is granted under the terms of the EPL version 2 (EPL2.0).
