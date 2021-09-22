@@ -7,41 +7,46 @@ import (
 
 // The Annotation model
 
-type RelationshipNameKey struct {
-	Index * int `json:"index" bson:"index"`
-	RelationshipName string `json:"relationship_name" bson:"relationship_name"`
-}
 
-type ClusterRelationship struct {
-	TokenClusters []*int `json:"token_clusters" bson:"token_clusters"`
-	RelationshipNames []RelationshipNameKey `json:"relationship_names" bson:"relationship_names"`
-	Index *int `json:"index" bson:"index"`
-}
-
-type TokenCluster struct {
-	Tokens []*int `json:"tokens" bson:"tokens"`
+type DocWrapper struct {
+	Index int `json:"index" bson:"index"`
 	Name string `json:"name" bson:"name"`
-	Tore string `json:"tore" bson:"tore"`
-	Index *int `json:"index" bson:"index"`
+	BeginIndex *int `json:"begin_index" bson:"begin_index"`
+	EndIndex *int `json:"end_index" bson:"end_index"`
+}
+
+type TORERelationship struct {
+	TOREEntity     *int                		`json:"TOREEntity" bson:"TOREEntity"`
+	TargetTokens   []*int 				`json:"target_tokens" bson:"target_tokens"`
+	RelationshipName string				`json:"relationship_name" bson:"relationship_name"`
+	Index          *int                  `json:"index" bson:"index"`
+}
+
+type Code struct {
+	Tokens                  []*int `json:"tokens" bson:"tokens"`
+	Name                    string `json:"name" bson:"name"`
+	Tore                    string `json:"tore" bson:"tore"`
+	Index                   *int   `json:"index" bson:"index"`
 	RelationshipMemberships []*int `json:"relationship_memberships" bson:"relationship_memberships"`
 }
 
 type Token struct {
-	Index *int `json:"index" bson:"index"`
-	Name string `validate:"nonzero" json:"name" bson:"name"`
-	Lemma string `validate:"nonzero" json:"lemma" bson:"lemma"`
-	Pos string `validate:"nonzero" json:"pos" bson:"pos"`
-	TokenCluster *int `json:"token_cluster" bson:"token_cluster"`
+	Index        *int   `json:"index" bson:"index"`
+	Name         string `validate:"nonzero" json:"name" bson:"name"`
+	Lemma        string `validate:"nonzero" json:"lemma" bson:"lemma"`
+	Pos          string `validate:"nonzero" json:"pos" bson:"pos"`
+	NumCodes     int    `json:"num_codes" bson:"num_codes"`
 }
 
 type Annotation struct {
 	UploadedAt time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
-	Name string `validate:"nonzero" json:"name" bson:"name"`
+	Name       string    `validate:"nonzero" json:"name" bson:"name"`
 	Dataset    string    `validate:"nonzero" json:"dataset" bson:"dataset"`
 
-	Tokens []Token `json:"tokens" bson:"tokens"`
-	TokenClusters []TokenCluster `json:"token_clusters" bson:"token_clusters"`
-	ClusterRelationships []ClusterRelationship `json:"cluster_relationships" bson:"cluster_relationships"`
+	Docs 			[]DocWrapper `json:"docs" bson:"docs"`
+	Tokens               []Token               `json:"tokens" bson:"tokens"`
+	Codes        []Code        `json:"codes" bson:"codes"`
+	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
 }
 
 // end Annotation model
