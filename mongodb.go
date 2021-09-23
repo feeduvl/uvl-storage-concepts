@@ -10,10 +10,12 @@ import (
 )
 
 const (
-	database          = "concepts_data"
-	collectionDataset = "dataset"
-	collectionResult  = "result"
+	database             = "concepts_data"
+	collectionDataset    = "dataset"
+	collectionResult     = "result"
+	collectionAnnotation = "annotation"
 
+	fieldAnnotationName    = "name"
 	fieldDatasetName       = "name"
 	fieldDatasetUploadedAt = "uploaded_at"
 	fieldResultStartedAt   = "started_at"
@@ -89,12 +91,11 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	panicError(err)
 }
 
-
 // MongoInsertAnnotation returns ok if the dataset was inserted or already existed
 func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) error {
-	query := bson.M{fieldDatasetName: annotation.Name}
+	query := bson.M{fieldAnnotationName: annotation.Name}
 	update := bson.M{"$set": annotation}
-	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
+	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
 		return err
@@ -102,7 +103,6 @@ func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) erro
 
 	return nil
 }
-
 
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
 func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
@@ -122,13 +122,12 @@ func MongoInsertResult(mongoClient *mgo.Session, result Result) error {
 	return handleErrorInsert(err)
 }
 
-
 // MongoDeleteAnnotation return ok if db entry could be deleted
-func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation Annotation) bool {
+func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation string) bool {
 	_, err := mongoClient.
 		DB(database).
-		C(collectionDataset).
-		RemoveAll(bson.M{fieldDatasetName: annotation.Name})
+		C(collectionAnnotation).
+		RemoveAll(bson.M{fieldAnnotationName: annotation})
 
 	return err == nil
 }
@@ -143,23 +142,21 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 	return err == nil
 }
 
-
 // MongoGetAnnotation returns an Annotation
-func MongoGetAnnotation(mongoClient *mgo.Session, annotation Annotation) Dataset {
-	var dataset []Dataset
+func MongoGetAnnotation(mongoClient *mgo.Session, annotation string) Annotation {
+	var annotationObj []Annotation
 	err := mongoClient.
 		DB(database).
-		C(collectionDataset).
-		Find(bson.M{fieldDatasetName: annotation.Name}).
-		All(&dataset)
+		C(collectionAnnotation).
+		Find(bson.M{fieldAnnotationName: annotation}).
+		All(&annotationObj)
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
 	}
 
-	return dataset[0]
+	return annotationObj[0]
 }
-
 
 // MongoDeleteResult return ok if db entry could be deleted
 func MongoDeleteResult(mongoClient *mgo.Session, result time.Time) bool {
@@ -209,8 +206,6 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 	}
 }
 
-
-
 // MongoGetAllAnnotations get all annotations
 func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
 
@@ -218,9 +213,9 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
 
 	err := mongoClient.
 		DB(database).
-		C(collectionDataset).
+		C(collectionAnnotation).
 		Find(nil).
-		Distinct(fieldDatasetName, &annotationNames)
+		Distinct(fieldAnnotationName, &annotationNames)
 
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -231,7 +226,6 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
 
 	return annotationNames
 }
-
 
 // MongoGetAllDatasets returns a dataset
 func MongoGetAllDatasets(mongoClient *mgo.Session) []string {

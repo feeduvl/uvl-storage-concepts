@@ -48,10 +48,13 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", getAnnotation).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", deleteResult).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", deleteAnnotation).Methods("DELETE")
 
 	return router
 }
@@ -63,7 +66,6 @@ func handleErrorWithRequest(err error, w http.ResponseWriter) {
 		panic(err)
 	}
 }
-
 
 //  store an existing annotation
 func postAnnotation(w http.ResponseWriter, r *http.Request) {
@@ -248,6 +250,41 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(dataset)
 }
 
+// getAnnotation return the annotation with a given name
+func getAnnotation(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	annotationName := params["name"]
+
+	fmt.Println("REST call: getAnnotation, params: ", annotationName)
+
+	// retrieve data from dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	annotation := MongoGetAnnotation(m, annotationName)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(annotation)
+}
+
+func getAllAnnotations(w http.ResponseWriter, _ *http.Request) {
+
+	fmt.Printf("REST call: getAllAnnotations\n")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	annotations := MongoGetAllAnnotations(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(annotations)
+
+}
+
 func getAllDatasets(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getAllDatasets\n")
@@ -278,6 +315,29 @@ func getAllDetectionResults(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(results)
 
+}
+
+func deleteAnnotation(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	annotationName := params["name"]
+
+	fmt.Printf("REST call: deleteAnnotation - %s\n", annotationName)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	ok := MongoDeleteAnnotation(m, annotationName)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if ok {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Annotation successfully deleted", Status: true})
+		return
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete annotation", Status: false})
+	}
 }
 
 func deleteDataset(w http.ResponseWriter, r *http.Request) {
