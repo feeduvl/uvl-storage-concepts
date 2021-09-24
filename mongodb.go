@@ -222,7 +222,7 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
 		panic(err)
 	}
 
-	fmt.Printf("getAllDatasets result: %s\n", annotationNames)
+	fmt.Printf("getAllAnnotations result: %s\n", annotationNames)
 
 	return annotationNames
 }

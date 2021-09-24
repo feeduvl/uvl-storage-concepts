@@ -256,7 +256,7 @@ func getAnnotation(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	annotationName := params["name"]
 
-	fmt.Println("REST call: getAnnotation, params: ", annotationName)
+	fmt.Println("REST call: getAnnotation, params: " + annotationName)
 
 	// retrieve data from dataset
 	m := mongoClient.Copy()
