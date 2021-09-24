@@ -9,7 +9,6 @@ import (
 
 
 type DocWrapper struct {
-	Index int `json:"index" bson:"index"`
 	Name string `json:"name" bson:"name"`
 	BeginIndex *int `json:"begin_index" bson:"begin_index"`
 	EndIndex *int `json:"end_index" bson:"end_index"`
