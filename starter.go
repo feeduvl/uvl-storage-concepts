@@ -254,7 +254,7 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 func getAnnotation(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
-	annotationName := params["name"]
+	annotationName := params["annotation"]
 
 	fmt.Println("REST call: getAnnotation, params: " + annotationName)
 
@@ -320,7 +320,7 @@ func getAllDetectionResults(w http.ResponseWriter, _ *http.Request) {
 func deleteAnnotation(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
-	annotationName := params["name"]
+	annotationName := params["annotation"]
 
 	fmt.Printf("REST call: deleteAnnotation - %s\n", annotationName)
 
