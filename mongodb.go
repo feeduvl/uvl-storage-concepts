@@ -208,24 +208,22 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 }
 
 // MongoGetAllAnnotations get all annotations
-func MongoGetAllAnnotations(mongoClient *mgo.Session) []string {
+func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
-	var annotationNames []string
+	var annotations []Annotation
 
 	err := mongoClient.
 		DB(database).
-		C(collectionAnnotation).
-		Find(nil).
-		Distinct(fieldAnnotationName, &annotationNames)
+		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1}).All(&annotations)
 
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
 	}
 
-	fmt.Printf("getAllAnnotations result: %s\n", annotationNames)
+	fmt.Printf("getAllAnnotations result: %v\n", annotations)
 
-	return annotationNames
+	return annotations
 }
 
 // MongoGetAllDatasets returns a dataset
