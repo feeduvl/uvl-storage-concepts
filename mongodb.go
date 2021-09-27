@@ -93,6 +93,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 
 // MongoInsertAnnotation returns ok if the dataset was inserted or already existed
 func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) error {
+	annotation.LastUpdated = time.Now()
 	query := bson.M{fieldAnnotationName: annotation.Name}
 	update := bson.M{"$set": annotation}
 	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)

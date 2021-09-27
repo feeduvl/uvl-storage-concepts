@@ -39,6 +39,8 @@ type Token struct {
 
 type Annotation struct {
 	UploadedAt time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
+	LastUpdated time.Time `json:"last_updated" bson:"last_updated"`
+
 	Name       string    `validate:"nonzero" json:"name" bson:"name"`
 	Dataset    string    `validate:"nonzero" json:"dataset" bson:"dataset"`
 
