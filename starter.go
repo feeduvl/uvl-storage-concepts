@@ -326,16 +326,17 @@ func deleteAnnotation(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	ok := MongoDeleteAnnotation(m, annotationName)
+	err := MongoDeleteAnnotation(m, annotationName)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	if ok {
+	if err == nil {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Annotation successfully deleted", Status: true})
 		return
 	} else {
-		w.WriteHeader(http.StatusBadRequest)
+		fmt.Printf("error deleting annotation: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete annotation", Status: false})
 	}
 }

@@ -123,14 +123,14 @@ func MongoInsertResult(mongoClient *mgo.Session, result Result) error {
 	return handleErrorInsert(err)
 }
 
-// MongoDeleteAnnotation return ok if db entry could be deleted
-func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation string) bool {
+// MongoDeleteAnnotation return err if there was an error
+func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation string) error {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).
 		RemoveAll(bson.M{fieldAnnotationName: annotation})
 
-	return err == nil
+	return err
 }
 
 // MongoDeleteDataset return ok if db entry could be deleted
