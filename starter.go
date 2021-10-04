@@ -274,6 +274,7 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 
 	err = MongoPostAllRelationshipNames(m, names)
 	if err != nil {
+		fmt.Printf("Error posting all relationship names: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusOK)
