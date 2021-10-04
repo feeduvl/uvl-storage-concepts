@@ -255,6 +255,7 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 
 func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Printf("postAllRelationshipNames")
 	m := mongoClient.Copy()
 	defer m.Close()
 	var body = bson.M{fieldRelationshipNames: new([]string)}
