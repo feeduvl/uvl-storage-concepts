@@ -258,9 +258,9 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	var body = bson.M{fieldRelationshipNames: new([]string)}
+	err := json.NewDecoder(r.Body).Decode(&body)
 	names := body[fieldRelationshipNames].([]string)
 
-	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		fmt.Printf("Error decoding request: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
