@@ -264,6 +264,7 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	fmt.Printf("Got body: %v", body)
 	var names []string
 	for _, value := range body[fieldRelationshipNames].([]interface{}) {
 		fmt.Printf("element: %v", value)
