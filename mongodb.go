@@ -15,6 +15,7 @@ const (
 	collectionResult     = "result"
 	collectionAnnotation = "annotation"
 
+	fieldRelationshipNames = "relationship_names"
 	fieldAnnotationName    = "name"
 	fieldDatasetName       = "name"
 	fieldDatasetUploadedAt = "uploaded_at"
@@ -141,6 +142,26 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 		RemoveAll(bson.M{fieldDatasetName: dataset})
 
 	return err == nil
+}
+
+func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string) error {
+	query := bson.M{fieldRelationshipNames: fieldRelationshipNames}
+	update := bson.M{"$set": names}
+	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
+
+	return err
+}
+
+func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
+	var names []string
+	err := mongoClient.
+		DB(database).
+		C(collectionAnnotation).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
+	if err != nil {
+		fmt.Printf("Error getting relationship names: %v\n", err)
+		return nil
+	}
+	return names
 }
 
 // MongoGetAnnotation returns an Annotation

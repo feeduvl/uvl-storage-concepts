@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"log"
 	"net/http"
 	"os"
@@ -43,12 +44,14 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/relationships", postAllRelationshipNames).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", getAnnotation).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/relationships", getAllRelationshipNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
 
 	// Delete
@@ -248,6 +251,39 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(dataset)
+}
+
+func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	var body = bson.M{fieldRelationshipNames: new([]string)}
+	names := body[fieldRelationshipNames].([]string)
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		fmt.Printf("Error decoding request: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		err := MongoPostAllRelationshipNames(m, names)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+}
+
+func getAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	names := MongoGetAllRelationshipNames(m)
+	if names == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		_ = json.NewEncoder(w).Encode(bson.M{"relationship_names": names})
+	}
 }
 
 // getAnnotation return the annotation with a given name
