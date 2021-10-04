@@ -44,7 +44,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
-	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships", postAllRelationshipNames).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -261,14 +261,14 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 	var body = bson.M{fieldRelationshipNames: new([]string)}
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
-		fmt.Printf("Error decoding request: %v", err)
+		fmt.Printf("Error decoding request: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("Got body: %v", body)
+	fmt.Printf("Got body: %v\n", body)
 	var names []string
 	for _, value := range body[fieldRelationshipNames].([]interface{}) {
-		fmt.Printf("element: %v", value)
+		fmt.Printf("element: %v\n", value)
 		names = append(names, value.(string))
 	}
 
