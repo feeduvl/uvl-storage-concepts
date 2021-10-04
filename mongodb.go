@@ -146,14 +146,14 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 
 func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string) error {
 	query := bson.M{fieldRelationshipNames: fieldRelationshipNames}
-	update := bson.M{"$set": names}
+	update := bson.M{"$set": bson.M{fieldRelationshipNames: names}}
 	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
 
 	return err
 }
 
 func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
-	var names []string
+	names := bson.M{fieldRelationshipNames: new([]string)}
 	err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
@@ -161,7 +161,11 @@ func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
 		fmt.Printf("Error getting relationship names: %v\n", err)
 		return nil
 	}
-	return names
+	var retnames []string
+	for _, value := range names[fieldRelationshipNames].([]interface{}) {
+		retnames = append(retnames, value.(string))
+	}
+	return retnames
 }
 
 // MongoGetAnnotation returns an Annotation
