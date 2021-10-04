@@ -264,18 +264,17 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	names := body[fieldRelationshipNames].([]string)
+	var names []string
+	for _, value := range body[fieldRelationshipNames].([]interface{}) {
+		fmt.Printf("element: %v", value)
+		names = append(names, value.(string))
+	}
 
+	err = MongoPostAllRelationshipNames(m, names)
 	if err != nil {
-		fmt.Printf("Error decoding request: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
-		err := MongoPostAllRelationshipNames(m, names)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
