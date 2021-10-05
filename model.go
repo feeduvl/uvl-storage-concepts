@@ -34,7 +34,8 @@ type Token struct {
 	Name         string `validate:"nonzero" json:"name" bson:"name"`
 	Lemma        string `validate:"nonzero" json:"lemma" bson:"lemma"`
 	Pos          string `validate:"nonzero" json:"pos" bson:"pos"`
-	NumCodes     int    `json:"num_codes" bson:"num_codes"`
+	NumNameCodes     int    `json:"num_name_codes" bson:"num_name_codes"`
+	NumToreCodes int `json:"num_tore_codes" bson:"num_tore_codes"`
 }
 
 type Annotation struct {
