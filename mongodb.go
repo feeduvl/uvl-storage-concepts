@@ -236,8 +236,12 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
 	var annotations []Annotation
+	_, err := mongoClient.
+		DB(database).
+		C(collectionAnnotation).
+		RemoveAll(bson.M{fieldAnnotationName: ""})
 
-	err := mongoClient.
+	err = mongoClient.
 		DB(database).
 		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1}).All(&annotations)
 
