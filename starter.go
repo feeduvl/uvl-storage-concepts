@@ -45,6 +45,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -52,6 +53,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", getAnnotation).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/relationships", getAllRelationshipNames).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/tores", getAllToreTypes).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
 
 	// Delete
@@ -251,6 +253,46 @@ func getDataset(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(dataset)
+}
+
+func postAllToreTypes(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("postAllToreTypes")
+	m := mongoClient.Copy()
+	defer m.Close()
+	var body = bson.M{fieldToreTypes: new([]string)}
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		fmt.Printf("Error decoding request: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Printf("Got body: %v\n", body)
+	var names []string
+	for _, value := range body[fieldToreTypes].([]interface{}) {
+		fmt.Printf("element: %v\n", value)
+		names = append(names, value.(string))
+	}
+
+	err = MongoPostAllTORE(m, names)
+	if err != nil {
+		fmt.Printf("Error posting all tore types: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func getAllToreTypes(w http.ResponseWriter, r *http.Request) {
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	names := MongoGetAllTORE(m)
+	if names == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		_ = json.NewEncoder(w).Encode(bson.M{"tores": names})
+	}
 }
 
 func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {

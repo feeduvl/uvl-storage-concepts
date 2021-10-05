@@ -16,6 +16,7 @@ const (
 	collectionAnnotation = "annotation"
 
 	fieldRelationshipNames = "relationship_names"
+	fieldToreTypes         = "tores"
 	fieldAnnotationName    = "name"
 	fieldDatasetName       = "name"
 	fieldDatasetUploadedAt = "uploaded_at"
@@ -142,6 +143,30 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 		RemoveAll(bson.M{fieldDatasetName: dataset})
 
 	return err == nil
+}
+
+func MongoPostAllTORE(mongoClient *mgo.Session, tores []string) error {
+	query := bson.M{fieldToreTypes: fieldToreTypes}
+	update := bson.M{"$set": bson.M{fieldToreTypes: fieldToreTypes, "names": tores}}
+	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
+
+	return err
+}
+
+func MongoGetAllTORE(mongoClient *mgo.Session) []string {
+	names := bson.M{"names": new([]string)}
+	err := mongoClient.
+		DB(database).
+		C(collectionAnnotation).Find(bson.M{fieldToreTypes: fieldToreTypes}).One(&names)
+	if err != nil {
+		fmt.Printf("Error getting tore types: %v\n", err)
+		return nil
+	}
+	var retnames []string
+	for _, value := range names["names"].([]interface{}) {
+		retnames = append(retnames, value.(string))
+	}
+	return retnames
 }
 
 func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string) error {
