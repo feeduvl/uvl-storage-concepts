@@ -162,8 +162,8 @@ func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
 		return nil
 	}
 	var retnames []string
-	for _, value := range names["names"].([]string) {
-		retnames = append(retnames, value)
+	for _, value := range names["names"].([]interface{}) {
+		retnames = append(retnames, value.(string))
 	}
 	return retnames
 }
