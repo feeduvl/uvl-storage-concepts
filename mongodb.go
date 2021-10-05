@@ -239,7 +239,7 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).
-		RemoveAll(bson.M{"uploaded_at": time.Time{}})
+		RemoveAll(bson.M{"uploaded_at": bson.M{"$exists": false}})
 
 	err = mongoClient.
 		DB(database).
