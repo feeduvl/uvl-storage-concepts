@@ -171,28 +171,33 @@ func MongoGetAllTORE(mongoClient *mgo.Session) []string {
 	return retnames
 }
 
-func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string) error {
+func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string, owners []string) error {
 	query := bson.M{fieldRelationshipNames: fieldRelationshipNames}
-	update := bson.M{"$set": bson.M{fieldRelationshipNames: fieldRelationshipNames, "names": names}}
+	update := bson.M{"$set": bson.M{fieldRelationshipNames: fieldRelationshipNames, "names": names, "owners": owners}}
 	_, err := mongoClient.DB(database).C(collectionRelationships).Upsert(query, update)
 
 	return err
 }
 
-func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
-	names := bson.M{"names": new([]string)}
+func MongoGetAllRelationshipNames(mongoClient *mgo.Session) ([]string, []string) {
+	names := bson.M{"names": new([]string), "owners": new([]string)}
 	err := mongoClient.
 		DB(database).
 		C(collectionRelationships).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
 	if err != nil {
 		fmt.Printf("Error getting relationship names: %v\n", err)
-		return nil
+		return nil, nil
 	}
 	var retnames []string
-	for _, value := range names["names"].([]interface{}) {
+	var retOwners []string
+
+	var owners = names["owners"].([]interface{})
+
+	for index, value := range names["names"].([]interface{}) {
 		retnames = append(retnames, value.(string))
+		retOwners = append(retOwners, owners[index].(string))
 	}
-	return retnames
+	return retnames, retOwners
 }
 
 // MongoGetAnnotation returns an Annotation

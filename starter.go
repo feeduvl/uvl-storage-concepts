@@ -300,7 +300,7 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("postAllRelationshipNames")
 	m := mongoClient.Copy()
 	defer m.Close()
-	var body = bson.M{fieldRelationshipNames: new([]string)}
+	var body = bson.M{fieldRelationshipNames: new([]string), "owners": new([]string)}
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
 		fmt.Printf("Error decoding request: %v\n", err)
@@ -309,12 +309,17 @@ func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Printf("Got body: %v\n", body)
 	var names []string
-	for _, value := range body[fieldRelationshipNames].([]interface{}) {
+	var owners []string
+
+	var bodyOwners = body["owners"].([]interface{})
+
+	for index, value := range body[fieldRelationshipNames].([]interface{}) {
 		fmt.Printf("element: %v\n", value)
 		names = append(names, value.(string))
+		owners = append(owners, bodyOwners[index].(string))
 	}
 
-	err = MongoPostAllRelationshipNames(m, names)
+	err = MongoPostAllRelationshipNames(m, names, owners)
 	if err != nil {
 		fmt.Printf("Error posting all relationship names: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -327,11 +332,11 @@ func getAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	names := MongoGetAllRelationshipNames(m)
+	names, owners := MongoGetAllRelationshipNames(m)
 	if names == nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
-		_ = json.NewEncoder(w).Encode(bson.M{"relationship_names": names})
+		_ = json.NewEncoder(w).Encode(bson.M{"relationship_names": names, "owners": owners})
 	}
 }
 
