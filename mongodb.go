@@ -10,10 +10,12 @@ import (
 )
 
 const (
-	database             = "concepts_data"
-	collectionDataset    = "dataset"
-	collectionResult     = "result"
-	collectionAnnotation = "annotation"
+	database                = "concepts_data"
+	collectionDataset       = "dataset"
+	collectionResult        = "result"
+	collectionAnnotation    = "annotation"
+	collectionRelationships = "relationship"
+	collectionTores         = "tores"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -148,7 +150,7 @@ func MongoDeleteDataset(mongoClient *mgo.Session, dataset string) bool {
 func MongoPostAllTORE(mongoClient *mgo.Session, tores []string) error {
 	query := bson.M{fieldToreTypes: fieldToreTypes}
 	update := bson.M{"$set": bson.M{fieldToreTypes: fieldToreTypes, "names": tores}}
-	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
+	_, err := mongoClient.DB(database).C(collectionTores).Upsert(query, update)
 
 	return err
 }
@@ -157,7 +159,7 @@ func MongoGetAllTORE(mongoClient *mgo.Session) []string {
 	names := bson.M{"names": new([]string)}
 	err := mongoClient.
 		DB(database).
-		C(collectionAnnotation).Find(bson.M{fieldToreTypes: fieldToreTypes}).One(&names)
+		C(collectionTores).Find(bson.M{fieldToreTypes: fieldToreTypes}).One(&names)
 	if err != nil {
 		fmt.Printf("Error getting tore types: %v\n", err)
 		return nil
@@ -172,7 +174,7 @@ func MongoGetAllTORE(mongoClient *mgo.Session) []string {
 func MongoPostAllRelationshipNames(mongoClient *mgo.Session, names []string) error {
 	query := bson.M{fieldRelationshipNames: fieldRelationshipNames}
 	update := bson.M{"$set": bson.M{fieldRelationshipNames: fieldRelationshipNames, "names": names}}
-	_, err := mongoClient.DB(database).C(collectionAnnotation).Upsert(query, update)
+	_, err := mongoClient.DB(database).C(collectionRelationships).Upsert(query, update)
 
 	return err
 }
@@ -181,7 +183,7 @@ func MongoGetAllRelationshipNames(mongoClient *mgo.Session) []string {
 	names := bson.M{"names": new([]string)}
 	err := mongoClient.
 		DB(database).
-		C(collectionAnnotation).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
+		C(collectionRelationships).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
 	if err != nil {
 		fmt.Printf("Error getting relationship names: %v\n", err)
 		return nil
@@ -262,12 +264,13 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
 	var annotations []Annotation
 
-	_, err := mongoClient.
-		DB(database).
-		C(collectionAnnotation).
-		RemoveAll(bson.M{"uploaded_at": bson.M{"$exists": false}})
+	/*
+		_, err := mongoClient.
+			DB(database).
+			C(collectionAnnotation).
+			RemoveAll(bson.M{"uploaded_at": bson.M{"$exists": false}})*/
 
-	err = mongoClient.
+	err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1}).All(&annotations)
 
