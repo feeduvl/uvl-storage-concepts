@@ -160,11 +160,12 @@ func MongoGetAllTORE(mongoClient *mgo.Session) []string {
 	err := mongoClient.
 		DB(database).
 		C(collectionTores).Find(bson.M{fieldToreTypes: fieldToreTypes}).One(&names)
+
+	var retnames []string
 	if err != nil {
 		fmt.Printf("Error getting tore types: %v\n", err)
-		return nil
+		return retnames
 	}
-	var retnames []string
 	for _, value := range names["names"].([]interface{}) {
 		retnames = append(retnames, value.(string))
 	}
@@ -184,13 +185,13 @@ func MongoGetAllRelationshipNames(mongoClient *mgo.Session) ([]string, []string)
 	err := mongoClient.
 		DB(database).
 		C(collectionRelationships).Find(bson.M{fieldRelationshipNames: fieldRelationshipNames}).One(&names)
-	if err != nil {
-		fmt.Printf("Error getting relationship names: %v\n", err)
-		return nil, nil
-	}
+
 	var retnames []string
 	var retOwners []string
-
+	if err != nil {
+		fmt.Printf("Error getting relationship names: %v\n", err)
+		return retnames, retOwners
+	}
 	var owners = names["owners"].([]interface{})
 
 	for index, value := range names["names"].([]interface{}) {
