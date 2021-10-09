@@ -270,13 +270,12 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
 	var annotations []Annotation
 
-	/*
-		_, err := mongoClient.
-			DB(database).
-			C(collectionAnnotation).
-			RemoveAll(bson.M{"uploaded_at": bson.M{"$exists": false}})*/
+	_, err := mongoClient.
+		DB(database).
+		C(collectionAnnotation).
+		RemoveAll(bson.M{"uploaded_at": bson.M{"$exists": false}})
 
-	err := mongoClient.
+	err = mongoClient.
 		DB(database).
 		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1}).All(&annotations)
 
