@@ -273,17 +273,7 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).
-		RemoveAll(bson.M{fieldRelationshipNames: bson.M{"$exists": true}})
-
-	_, err = mongoClient.
-		DB(database).
-		C(collectionAnnotation).
-		RemoveAll(bson.M{fieldToreTypes: bson.M{"$exists": true}})
-
-	_, err = mongoClient.
-		DB(database).
-		C(collectionAnnotation).
-		RemoveAll(bson.M{fieldAnnotationName: bson.M{"$exists": false}})
+		RemoveAll(bson.M{"created_at": bson.M{"$exists": false}})
 
 	err = mongoClient.
 		DB(database).
