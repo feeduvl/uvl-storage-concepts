@@ -275,7 +275,12 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 		DB(database).
 		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1}).All(&annotations)
 
-	err = mongoClient.DB(database).C(collectionAnnotation).Find(bson.M{}).All(&weird)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	err = mongoClient.DB(database).C(collectionAnnotation).Find(nil).All(&weird)
 
 	if err != nil {
 		fmt.Println("ERR", err)
