@@ -269,7 +269,6 @@ func MongoGetResult(mongoClient *mgo.Session, startedAt time.Time) Result {
 func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
 	var annotations []Annotation
-	var weird []bson.M
 
 	err := mongoClient.
 		DB(database).
@@ -278,17 +277,6 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
-	}
-
-	err = mongoClient.DB(database).C(collectionAnnotation).Find(nil).All(&weird)
-
-	if err != nil {
-		fmt.Println("ERR", err)
-		panic(err)
-	}
-
-	for _, w := range weird {
-		fmt.Printf("found element: %v\n", w)
 	}
 
 	fmt.Printf("getAllAnnotations result: %v\n", annotations)
