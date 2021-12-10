@@ -16,10 +16,12 @@ const (
 	collectionAnnotation    = "annotation"
 	collectionRelationships = "relationship"
 	collectionTores         = "tores"
+	collectionAgreement     = "agreement"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
 	fieldAnnotationName    = "name"
+	fieldAgreementName     = "name"
 	fieldDatasetName       = "name"
 	fieldDatasetUploadedAt = "uploaded_at"
 	fieldResultStartedAt   = "started_at"
@@ -109,6 +111,20 @@ func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) erro
 	return nil
 }
 
+// MongoInsertAgreement returns ok if the dataset was inserted or already existed
+func MongoInsertAgreement(mongoClient *mgo.Session, agreement Agreement) error {
+	agreement.LastUpdated = time.Now()
+	query := bson.M{fieldAgreementName: agreement.Name}
+	update := bson.M{"$set": agreement}
+	_, err := mongoClient.DB(database).C(collectionAgreement).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
 func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
@@ -133,6 +149,16 @@ func MongoDeleteAnnotation(mongoClient *mgo.Session, annotation string) error {
 		DB(database).
 		C(collectionAnnotation).
 		RemoveAll(bson.M{fieldAnnotationName: annotation})
+
+	return err
+}
+
+// MongoDeleteAgreement return err if there was an error
+func MongoDeleteAgreement(mongoClient *mgo.Session, agreement string) error {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionAgreement).
+		RemoveAll(bson.M{fieldAgreementName: agreement})
 
 	return err
 }
@@ -217,6 +243,38 @@ func MongoGetAnnotation(mongoClient *mgo.Session, annotation string) Annotation 
 	return annotationObj[0]
 }
 
+// MongoGetAgreement returns an Agreement
+func MongoGetAgreement(mongoClient *mgo.Session, agreement string) Agreement {
+	var agreementObj []Agreement
+	err := mongoClient.
+		DB(database).
+		C(collectionAgreement).
+		Find(bson.M{fieldAgreementName: agreement}).
+		All(&agreementObj)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return agreementObj[0]
+}
+
+// MongoGetAnnotationsForDataset returns a list of Agreements for a dataset
+func MongoGetAnnotationsForDataset(mongoClient *mgo.Session, dataset string) []Annotation {
+	var annotationObj []Annotation
+	err := mongoClient.
+		DB(database).
+		C(collectionAnnotation).
+		Find(bson.M{fieldDatasetName: dataset}).
+		All(&annotationObj)
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	return annotationObj
+}
+
 // MongoDeleteResult return ok if db entry could be deleted
 func MongoDeleteResult(mongoClient *mgo.Session, result time.Time) bool {
 	_, err := mongoClient.
@@ -282,6 +340,25 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 	fmt.Printf("getAllAnnotations result: %v\n", annotations)
 
 	return annotations
+}
+
+// MongoGetAllAgreements get all agreements
+func MongoGetAllAgreements(mongoClient *mgo.Session) []Agreement {
+
+	var agreements []Agreement
+
+	err := mongoClient.
+		DB(database).
+		C(collectionAgreement).Find(bson.M{}).Select(bson.M{"created_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "annotationNames": 1, "isMerged": 1}).All(&agreements)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	fmt.Printf("getAllAgreements result: %v\n", agreements)
+
+	return agreements
 }
 
 // MongoGetAllDatasets returns a dataset

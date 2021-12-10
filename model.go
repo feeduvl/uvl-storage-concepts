@@ -7,18 +7,17 @@ import (
 
 // The Annotation model
 
-
 type DocWrapper struct {
-	Name string `json:"name" bson:"name"`
-	BeginIndex *int `json:"begin_index" bson:"begin_index"`
-	EndIndex *int `json:"end_index" bson:"end_index"`
+	Name       string `json:"name" bson:"name"`
+	BeginIndex *int   `json:"begin_index" bson:"begin_index"`
+	EndIndex   *int   `json:"end_index" bson:"end_index"`
 }
 
 type TORERelationship struct {
-	TOREEntity     *int                		`json:"TOREEntity" bson:"TOREEntity"`
-	TargetTokens   []*int 				`json:"target_tokens" bson:"target_tokens"`
-	RelationshipName string				`json:"relationship_name" bson:"relationship_name"`
-	Index          *int                  `json:"index" bson:"index"`
+	TOREEntity       *int   `json:"TOREEntity" bson:"TOREEntity"`
+	TargetTokens     []*int `json:"target_tokens" bson:"target_tokens"`
+	RelationshipName string `json:"relationship_name" bson:"relationship_name"`
+	Index            *int   `json:"index" bson:"index"`
 }
 
 type Code struct {
@@ -34,24 +33,41 @@ type Token struct {
 	Name         string `validate:"nonzero" json:"name" bson:"name"`
 	Lemma        string `validate:"nonzero" json:"lemma" bson:"lemma"`
 	Pos          string `validate:"nonzero" json:"pos" bson:"pos"`
-	NumNameCodes     int    `json:"num_name_codes" bson:"num_name_codes"`
-	NumToreCodes int `json:"num_tore_codes" bson:"num_tore_codes"`
+	NumNameCodes int    `json:"num_name_codes" bson:"num_name_codes"`
+	NumToreCodes int    `json:"num_tore_codes" bson:"num_tore_codes"`
 }
 
 type Annotation struct {
-	UploadedAt time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
+	UploadedAt  time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
 	LastUpdated time.Time `json:"last_updated" bson:"last_updated"`
 
-	Name       string    `validate:"nonzero" json:"name" bson:"name"`
-	Dataset    string    `validate:"nonzero" json:"dataset" bson:"dataset"`
+	Name    string `validate:"nonzero" json:"name" bson:"name"`
+	Dataset string `validate:"nonzero" json:"dataset" bson:"dataset"`
 
-	Docs 			[]DocWrapper `json:"docs" bson:"docs"`
-	Tokens               []Token               `json:"tokens" bson:"tokens"`
-	Codes        []Code        `json:"codes" bson:"codes"`
+	Docs              []DocWrapper       `json:"docs" bson:"docs"`
+	Tokens            []Token            `json:"tokens" bson:"tokens"`
+	Codes             []Code             `json:"codes" bson:"codes"`
 	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
 }
 
 // end Annotation model
+
+// Agreement model
+type Agreement struct {
+	CreatedAt   time.Time `validate:"nonzero" json:"created_at" bson:"created_at"`
+	LastUpdated time.Time `json:"last_updated" bson:"last_updated"`
+
+	Name        string   `validate:"nonzero" json:"name" bson:"name"`
+	Dataset     string   `validate:"nonzero" json:"dataset" bson:"dataset"`
+	Annotations []string `json:"annotationNames" bson:"annotationNames"`
+
+	Docs              []DocWrapper       `json:"docs" bson:"docs"`
+	Tokens            []Token            `json:"tokens" bson:"tokens"`
+	Codes             []Code             `json:"codes" bson:"codes"`
+	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
+
+	IsMerged bool `json:"is_merged" bson:"is_merged"`
+}
 
 // Dataset model
 type Dataset struct {

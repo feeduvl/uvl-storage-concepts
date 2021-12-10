@@ -44,6 +44,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/", postDetectionResult).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 
@@ -52,14 +53,18 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/all", getAllDetectionResults).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", getAnnotation).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/agreement/name/{agreement}", getAgreement).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/relationships", getAllRelationshipNames).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/tores", getAllToreTypes).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/agreement/all", getAllAgreements).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", deleteResult).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", deleteAnnotation).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/agreement/name/{agreement}", deleteAgreement).Methods("DELETE")
 
 	return router
 }
@@ -89,6 +94,34 @@ func postAnnotation(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	err = MongoInsertAnnotation(m, annotation)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+//  store an existing agreement
+func postAgreement(w http.ResponseWriter, r *http.Request) {
+	var agreement Agreement
+	err := json.NewDecoder(r.Body).Decode(&agreement)
+
+	fmt.Printf("postAgreement called. Agreement: %s\n", agreement.Name)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertAgreement(m, agreement)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -359,6 +392,44 @@ func getAnnotation(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(annotation)
 }
 
+// getAgreement return the agreement with a given name
+func getAgreement(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	agreementName := params["agreement"]
+
+	fmt.Println("REST call: getAgreement, params: " + agreementName)
+
+	// retrieve data from dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	agreement := MongoGetAgreement(m, agreementName)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(agreement)
+}
+
+// getAnnotationsForDataset return all annotations for a given dataset
+func getAnnotationsForDataset(w http.ResponseWriter, r *http.Request) {
+	// get request param
+	params := mux.Vars(r)
+	dataset := params["dataset"]
+
+	fmt.Println("REST call: getAnnotationsForDataset, params: " + dataset)
+
+	// retrieve data from dataset
+	m := mongoClient.Copy()
+	defer m.Close()
+	annotations := MongoGetAnnotationsForDataset(m, dataset)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(annotations)
+}
+
 func getAllAnnotations(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getAllAnnotations\n")
@@ -372,6 +443,22 @@ func getAllAnnotations(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(annotations)
+
+}
+
+func getAllAgreements(w http.ResponseWriter, _ *http.Request) {
+
+	fmt.Printf("REST call: getAllAgreements\n")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	agreements := MongoGetAllAgreements(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(agreements)
 
 }
 
@@ -428,6 +515,30 @@ func deleteAnnotation(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("error deleting annotation: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete annotation", Status: false})
+	}
+}
+
+func deleteAgreement(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	agreementName := params["agreement"]
+
+	fmt.Printf("REST call: deleteAgreement - %s\n", agreementName)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	err := MongoDeleteAgreement(m, agreementName)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if err == nil {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Agreement successfully deleted", Status: true})
+		return
+	} else {
+		fmt.Printf("error deleting agreement: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete agreement", Status: false})
 	}
 }
 
