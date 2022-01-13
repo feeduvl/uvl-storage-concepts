@@ -259,20 +259,20 @@ func MongoGetAgreement(mongoClient *mgo.Session, agreement string) Agreement {
 	return agreementObj[0]
 }
 
-// MongoGetAnnotationsForDataset returns a list of Agreements for a dataset
+// MongoGetAnnotationsForDataset returns a list of Annotations for a dataset
 func MongoGetAnnotationsForDataset(mongoClient *mgo.Session, dataset string) []Annotation {
-	var annotationObj []Annotation
+	var annotations []Annotation
 	err := mongoClient.
 		DB(database).
 		C(collectionAnnotation).
 		Find(bson.M{fieldDatasetName: dataset}).
-		All(&annotationObj)
+		All(&annotations)
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(err)
 	}
 
-	return annotationObj
+	return annotations
 }
 
 // MongoDeleteResult return ok if db entry could be deleted
@@ -349,7 +349,7 @@ func MongoGetAllAgreements(mongoClient *mgo.Session) []Agreement {
 
 	err := mongoClient.
 		DB(database).
-		C(collectionAgreement).Find(bson.M{}).Select(bson.M{"created_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "annotationNames": 1, "isMerged": 1}).All(&agreements)
+		C(collectionAgreement).Find(bson.M{}).Select(bson.M{"created_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "annotation_names": 1, "is_completed": 1}).All(&agreements)
 
 	if err != nil {
 		fmt.Println("ERR", err)
