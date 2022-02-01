@@ -114,6 +114,8 @@ func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) erro
 // MongoInsertAgreement returns ok if the dataset was inserted or already existed
 func MongoInsertAgreement(mongoClient *mgo.Session, agreement Agreement) error {
 	agreement.LastUpdated = time.Now()
+	var isCompleted = calculateIsCompleted(agreement)
+	agreement.IsCompleted = isCompleted
 	query := bson.M{fieldAgreementName: agreement.Name}
 	update := bson.M{"$set": agreement}
 	_, err := mongoClient.DB(database).C(collectionAgreement).Upsert(query, update)
@@ -123,6 +125,25 @@ func MongoInsertAgreement(mongoClient *mgo.Session, agreement Agreement) error {
 	}
 
 	return nil
+}
+
+func calculateIsCompleted(agreement Agreement) bool {
+	for _, tore := range agreement.TORECodeAlternatives {
+		if tore.MergeStatus == "Pending" {
+			return false
+		}
+	}
+	for _, wordCode := range agreement.WordCodeAlternatives {
+		if wordCode.MergeStatus == "Pending" {
+			return false
+		}
+	}
+	for _, relationship := range agreement.RelationshipAlternatives {
+		if relationship.MergeStatus == "Pending" {
+			return false
+		}
+	}
+	return true
 }
 
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
