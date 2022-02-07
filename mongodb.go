@@ -128,18 +128,8 @@ func MongoInsertAgreement(mongoClient *mgo.Session, agreement Agreement) error {
 }
 
 func calculateIsCompleted(agreement Agreement) bool {
-	for _, tore := range agreement.TORECodeAlternatives {
-		if tore.MergeStatus == "Pending" {
-			return false
-		}
-	}
-	for _, wordCode := range agreement.WordCodeAlternatives {
-		if wordCode.MergeStatus == "Pending" {
-			return false
-		}
-	}
-	for _, relationship := range agreement.RelationshipAlternatives {
-		if relationship.MergeStatus == "Pending" {
+	for _, codeAlternative := range agreement.CodeAlternatives {
+		if codeAlternative.MergeStatus == "Pending" {
 			return false
 		}
 	}

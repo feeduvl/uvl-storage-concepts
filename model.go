@@ -53,35 +53,13 @@ type Annotation struct {
 // end Annotation model
 // The Agreement model
 
-// TORECodeAlternatives model, shows all TORE-code/category alternatives from all Annotations, MergeStatus can be set to Pending, Accepted or Declined
-type TORECodeAlternatives struct {
-	Index          *int   `json:"index" bson:"index"`
+// CodeAlternatives model, shows all code alternatives from all annotations, MergeStatus can be set to Pending, Accepted or Declined
+type CodeAlternatives struct {
 	AnnotationName string `json:"annotation_name" bson:"annotation_name"`
 	MergeStatus    string `validate:"nonzero" json:"merge_status" bson:"merge_status"`
 
-	Tokens []*int `json:"tokens" bson:"tokens"`
-	Tore   string `json:"tore" bson:"tore"`
-}
-
-// WordCodeAlternatives model, shows all word code alternatives from all annotations, MergeStatus can be set to Pending, Accepted or Declined
-type WordCodeAlternatives struct {
-	Index          *int   `json:"index" bson:"index"`
-	AnnotationName string `json:"annotation_name" bson:"annotation_name"`
-	MergeStatus    string `validate:"nonzero" json:"merge_status" bson:"merge_status"`
-
-	Tokens []*int `json:"tokens" bson:"tokens"`
-	Name   string `json:"name" bson:"name"`
-}
-
-// RelationshipAlternatives model, shows all relationship alternatives from all annotations, MergeStatus can be set to Pending, Accepted or Declined
-type RelationshipAlternatives struct {
-	Index          *int   `json:"index" bson:"index"`
-	AnnotationName string `json:"annotation_name" bson:"annotation_name"`
-	MergeStatus    string `validate:"nonzero" json:"merge_status" bson:"merge_status"`
-
-	Tokens                  []*int             `json:"tokens" bson:"tokens"`
-	RelationshipMemberships []*int             `json:"relationship_memberships" bson:"relationship_memberships"`
-	TORERelationships       []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
+	Code              Code               `json:"code" bson:"code"`
+	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
 }
 
 // Agreement model
@@ -96,9 +74,7 @@ type Agreement struct {
 	Docs   []DocWrapper `json:"docs" bson:"docs"`
 	Tokens []Token      `json:"tokens" bson:"tokens"`
 
-	TORECodeAlternatives     []TORECodeAlternatives     `json:"tore_code_alternatives" bson:"tore_code_alternatives"`
-	WordCodeAlternatives     []WordCodeAlternatives     `json:"word_code_alternatives" bson:"word_code_alternatives"`
-	RelationshipAlternatives []RelationshipAlternatives `json:"relationship_alternatives" bson:"relationship_alternatives"`
+	CodeAlternatives []CodeAlternatives `json:"code_alternatives" bson:"code_alternatives"`
 
 	IsCompleted bool `json:"is_completed" bson:"is_completed"`
 }
