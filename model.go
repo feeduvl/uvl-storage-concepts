@@ -59,8 +59,7 @@ type CodeAlternatives struct {
 	MergeStatus    string `validate:"nonzero" json:"merge_status" bson:"merge_status"`
 	Index          int    `json:"index" bson:"index"`
 
-	Code              Code               `json:"code" bson:"code"`
-	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
+	Code Code `json:"code" bson:"code"`
 }
 
 // Agreement model
@@ -72,8 +71,9 @@ type Agreement struct {
 	Dataset     string   `validate:"nonzero" json:"dataset" bson:"dataset"`
 	Annotations []string `json:"annotation_names" bson:"annotation_names"`
 
-	Docs   []DocWrapper `json:"docs" bson:"docs"`
-	Tokens []Token      `json:"tokens" bson:"tokens"`
+	Docs              []DocWrapper       `json:"docs" bson:"docs"`
+	Tokens            []Token            `json:"tokens" bson:"tokens"`
+	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
 
 	CodeAlternatives []CodeAlternatives `json:"code_alternatives" bson:"code_alternatives"`
 
