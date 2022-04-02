@@ -45,7 +45,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
-	router.HandleFunc("/hitec/repository/concepts/store/agreement/statistics/refresh/name/{agreement}", refreshStatisticsOfAgreement).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/agreement/statistics/refresh/", refreshStatisticsOfAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 
