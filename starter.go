@@ -122,13 +122,19 @@ func refreshStatisticsOfAgreement(w http.ResponseWriter, r *http.Request) {
 	// Calculate current Kappa
 	data, err := RESTCalculateKappaFromAgreement(agreement)
 	if err != nil {
-		fmt.Printf("Failed to get initial kappa")
+		fmt.Printf("Failed to get current kappa")
 		return
 	}
 	fleissKappa := data["fleissKappa"]
 	brennanKappa := data["brennanKappa"]
-	agreement.AgreementStatistics.CurrentFleissKappa = fleissKappa
-	agreement.AgreementStatistics.CurrentBrennanKappa = brennanKappa
+	for _, kappa := range agreement.AgreementStatistics {
+		if kappa.KappaName == "fleiss" {
+			kappa.CurrentKappa = fleissKappa
+		}
+		if kappa.KappaName == "brennan-and-prediger" {
+			kappa.CurrentKappa = brennanKappa
+		}
+	}
 
 	// insert data into the db
 	m := mongoClient.Copy()
@@ -140,13 +146,10 @@ func refreshStatisticsOfAgreement(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	var body = map[string]float64{}
-	body["fleissKappa"] = fleissKappa
-	body["brennanKappa"] = brennanKappa
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(body)
+	_ = json.NewEncoder(w).Encode(agreement.AgreementStatistics)
 }
 
 //  store an existing agreement
