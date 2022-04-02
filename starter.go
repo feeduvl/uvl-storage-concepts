@@ -45,6 +45,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/agreement/statistics/refresh/name/{agreement}", refreshStatisticsOfAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 
@@ -103,6 +104,49 @@ func postAnnotation(w http.ResponseWriter, r *http.Request) {
 	// send response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+//  refresh statistics of an existing agreement
+func refreshStatisticsOfAgreement(w http.ResponseWriter, r *http.Request) {
+	var agreement Agreement
+	err := json.NewDecoder(r.Body).Decode(&agreement)
+
+	fmt.Printf("refreshStatisticsOfAgreement called. Agreement: %s\n", agreement.Name)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// Calculate current Kappa
+	data, err := RESTCalculateKappaFromAgreement(agreement)
+	if err != nil {
+		fmt.Printf("Failed to get initial kappa")
+		return
+	}
+	fleissKappa := data["fleissKappa"]
+	brennanKappa := data["brennanKappa"]
+	agreement.AgreementStatistics.CurrentFleissKappa = fleissKappa
+	agreement.AgreementStatistics.CurrentBrennanKappa = brennanKappa
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertAgreement(m, agreement)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	var body = map[string]float64{}
+	body["fleissKappa"] = fleissKappa
+	body["brennanKappa"] = brennanKappa
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(body)
 }
 
 //  store an existing agreement
