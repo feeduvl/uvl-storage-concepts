@@ -45,7 +45,6 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/detection/result/name", postUpdateResultName).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/", postAnnotation).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
-	router.HandleFunc("/hitec/repository/concepts/store/agreement/statistics/refresh/", refreshStatisticsOfAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 
@@ -104,52 +103,6 @@ func postAnnotation(w http.ResponseWriter, r *http.Request) {
 	// send response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
-}
-
-//  refresh statistics of an existing agreement
-func refreshStatisticsOfAgreement(w http.ResponseWriter, r *http.Request) {
-	var agreement Agreement
-	err := json.NewDecoder(r.Body).Decode(&agreement)
-
-	fmt.Printf("refreshStatisticsOfAgreement called. Agreement: %s\n", agreement.Name)
-
-	if err != nil {
-		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
-
-	// Calculate current Kappa
-	data, err := RESTCalculateKappaFromAgreement(agreement)
-	if err != nil {
-		fmt.Printf("Failed to get current kappa")
-		return
-	}
-	fleissKappa := data["fleissKappa"]
-	brennanKappa := data["brennanKappa"]
-	for _, kappa := range agreement.AgreementStatistics {
-		if kappa.KappaName == "fleiss" {
-			kappa.CurrentKappa = fleissKappa
-		}
-		if kappa.KappaName == "brennan-and-prediger" {
-			kappa.CurrentKappa = brennanKappa
-		}
-	}
-
-	// insert data into the db
-	m := mongoClient.Copy()
-	defer m.Close()
-	err = MongoInsertAgreement(m, agreement)
-	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
-		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
-	}
-
-	// write the response
-	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(agreement.AgreementStatistics)
 }
 
 //  store an existing agreement
