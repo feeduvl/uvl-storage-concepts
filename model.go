@@ -139,7 +139,7 @@ type Date struct {
 // Crawler Jobs model
 type CrawlerJobs struct {
 	SubredditName string    `validate:"nonzero" json:"subreddit_name" bson:"subreddit_name"`
-	Date          time.Date `validate:"nonzero" json:"date" bson:"date"`
+	Date          string    `validate:"nonzero" json:"date" bson:"date"`
 	NumberPosts   int       `validate:"nonzero" json:"number_posts" bson:"number_posts"`
 	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
 }
