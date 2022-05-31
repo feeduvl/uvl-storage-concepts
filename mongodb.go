@@ -406,9 +406,9 @@ func MongoGetAllResults(mongoClient *mgo.Session) []Result {
 
 
 // MongoGetCrawlerJobs returns all registered crawler jobs
-func MongoGetCrawlerJobs(mongoClient *mgo.Session) []Result {
+func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
 
-	var crawlerJobs []Result
+	var crawlerJobs []CrawlerJobs
 
 	err := mongoClient.
 		DB(database).
