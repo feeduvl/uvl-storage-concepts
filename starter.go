@@ -59,6 +59,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/agreement/all", getAllAgreements).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
@@ -597,4 +598,20 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
+}
+
+func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
+
+	fmt.Printf("REST call: getCrawlerJobs\n")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	crawlerJobs := MongoGetCrawlerJobs(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(crawlerJobs)
+
 }

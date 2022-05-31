@@ -17,6 +17,7 @@ const (
 	collectionRelationships = "relationship"
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
+	collectionCrawlerJobs   = "crawler_jobs"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -401,4 +402,25 @@ func MongoGetAllResults(mongoClient *mgo.Session) []Result {
 	panicError(err)
 
 	return results
+}
+
+
+// MongoGetCrawlerJobs returns all registered crawler jobs
+func MongoGetCrawlerJobs(mongoClient *mgo.Session) []Result {
+
+	var crawlerJobs []Result
+
+	err := mongoClient.
+		DB(database).
+		C(collectionCrawlerJobs).Find(bson.M{}).Select(bson.M{"subreddit_name": 1, "date": 1, "number_posts": 1, "dataset_name": 1}).All(&crawlerJobs)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	fmt.Printf("getAllAgreements result: %v\n", crawlerJobs)
+
+	return crawlerJobs
+
 }
