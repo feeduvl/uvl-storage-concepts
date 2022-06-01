@@ -633,7 +633,7 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	// insert data into the db
 	m := mongoClient.Copy()
 	defer m.Close()
-	err = MongoInsertCrawlerJobs(m, crawler_jobs)
+	err = MongoInsertCrawlerJobs(m, crawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)

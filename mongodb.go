@@ -27,6 +27,7 @@ const (
 	fieldDatasetUploadedAt = "uploaded_at"
 	fieldResultStartedAt   = "started_at"
 	fieldResultMethodName  = "method"
+	fieldCrawlerJobName    = "DatasetName"
 )
 
 func panicError(err error) {
