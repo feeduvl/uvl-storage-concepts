@@ -47,6 +47,8 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
+
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -614,4 +616,31 @@ func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(crawlerJobs)
 
+}
+
+func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
+	var crawlerJobs CrawlerJobs
+	err := json.NewDecoder(r.Body).Decode(&crawlerJobs)
+
+	fmt.Printf("postCrawlerJobs called. Crawler Job of: %s\n", crawlerJobs.DatasetName)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertCrawlerJobs(m, crawler_jobs)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
