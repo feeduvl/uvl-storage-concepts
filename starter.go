@@ -50,7 +50,6 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
 
-
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/dataset/all", getAllDatasets).Methods("GET")
@@ -381,7 +380,8 @@ func getAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 func getAnnotation(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
-	annotationName := params["annotation"]
+	annotationNameEscaped := params["annotation"]
+	annotationName, _ := url.QueryUnescape(annotationNameEscaped)
 
 	fmt.Println("REST call: getAnnotation, params: " + annotationName)
 
