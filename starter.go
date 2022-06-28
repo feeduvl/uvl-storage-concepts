@@ -7,6 +7,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -396,7 +397,8 @@ func getAnnotation(w http.ResponseWriter, r *http.Request) {
 func getAgreement(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
-	agreementName := params["agreement"]
+	agreementNameEscaped := params["agreement"]
+	agreementName, _ := url.QueryUnescape(agreementNameEscaped)
 
 	fmt.Println("REST call: getAgreement, params: " + agreementName)
 
