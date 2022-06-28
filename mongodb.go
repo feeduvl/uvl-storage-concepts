@@ -17,6 +17,7 @@ const (
 	collectionRelationships = "relationship"
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
+	collectionCrawlerJobs   = "crawler_jobs"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -26,6 +27,7 @@ const (
 	fieldDatasetUploadedAt = "uploaded_at"
 	fieldResultStartedAt   = "started_at"
 	fieldResultMethodName  = "method"
+	fieldCrawlerJobName    = "DatasetName"
 )
 
 func panicError(err error) {
@@ -401,4 +403,39 @@ func MongoGetAllResults(mongoClient *mgo.Session) []Result {
 	panicError(err)
 
 	return results
+}
+
+
+// MongoGetCrawlerJobs returns all registered crawler jobs
+func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
+
+	var crawlerJobs []CrawlerJobs
+
+	err := mongoClient.
+		DB(database).
+		C(collectionCrawlerJobs).Find(bson.M{}).Select(bson.M{"subreddit_names": 1, "date": 1, "occurrence": 1, "number_posts": 1, "dataset_name": 1}).All(&crawlerJobs)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	fmt.Printf("getAllAgreements result: %v\n", crawlerJobs)
+
+	return crawlerJobs
+
+}
+
+func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) error {
+	crawlerJob.Date = time.Now()
+	query := bson.M{fieldCrawlerJobName: crawlerJob.DatasetName}
+	update := bson.M{"$set": crawlerJob}
+
+	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Upsert(query, update)
+	if err != nil && !mgo.IsDup(err) {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }

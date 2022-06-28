@@ -136,6 +136,16 @@ type Date struct {
 	Date time.Time `json:"date"`
 }
 
+// Crawler Jobs model
+type CrawlerJobs struct {
+	SubredditName string    `validate:"nonzero" json:"subreddit_names" bson:"subreddit_names"`
+	Date          time.Time `validate:"nonzero" json:"date" bson:"date"`
+	Occurrence    int       `json:"occurrence" bson:"occurrence"`
+	NumberPosts   int       `json:"number_posts" bson:"number_posts"`
+	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
+	Request       string    `validate:"nonzero" json:"request" bson:"request"`
+}
+
 func (result *Result) validate() error {
 	return validator.Validate(result)
 }

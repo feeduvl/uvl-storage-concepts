@@ -48,6 +48,8 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/agreement/", postAgreement).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
+
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -60,6 +62,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/all", getAllAnnotations).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/agreement/all", getAllAgreements).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
@@ -599,4 +602,47 @@ func deleteResult(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete result", Status: false})
 	}
+}
+
+func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
+
+	fmt.Printf("REST call: getCrawlerJobs\n")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	crawlerJobs := MongoGetCrawlerJobs(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(crawlerJobs)
+
+}
+
+func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
+	var crawlerJobs CrawlerJobs
+	err := json.NewDecoder(r.Body).Decode(&crawlerJobs)
+
+	fmt.Printf("postCrawlerJobs called. Crawler Job of: %s\n", crawlerJobs.DatasetName)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertCrawlerJobs(m, crawlerJobs)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
