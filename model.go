@@ -123,6 +123,7 @@ type Result struct {
 	DocTopic    map[string]interface{} `json:"doc_topic" bson:"doc_topic"`
 	Metrics     map[string]interface{} `json:"metrics" bson:"metrics"`
 	Name        string                 `json:"name" bson:"name"`
+	Annotation  Annotation			   `json:"annotation" bson:"annotation"`
 }
 
 // ResponseMessage model
