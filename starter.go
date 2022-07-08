@@ -380,8 +380,7 @@ func getAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
 func getAnnotation(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
-	annotationNameEscaped := params["annotation"]
-	annotationName, _ := url.QueryUnescape(annotationNameEscaped)
+	annotationName := params["annotation"]
 
 	fmt.Println("REST call: getAnnotation, params: " + annotationName)
 
@@ -400,8 +399,7 @@ func getAnnotation(w http.ResponseWriter, r *http.Request) {
 func getAgreement(w http.ResponseWriter, r *http.Request) {
 	// get request param
 	params := mux.Vars(r)
-	agreementNameEscaped := params["agreement"]
-	agreementName, _ := url.QueryUnescape(agreementNameEscaped)
+	agreementName := params["agreement"]
 
 	fmt.Println("REST call: getAgreement, params: " + agreementName)
 
