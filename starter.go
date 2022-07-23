@@ -650,7 +650,8 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	crawlerJobDate := params["date"]
 
-	fmt.Printf("REST call: deleteCrawlerJob - %s\n", crawlerJobDate)
+	fmt.Printf("REST call: deleteCrawlerJob: ")
+	fmt.Printf(crawlerJobDate)
 
 	_t := "{\"date\": \"" + crawlerJobDate + "\"}"
 	var t Date
