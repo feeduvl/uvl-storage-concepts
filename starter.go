@@ -665,11 +665,11 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	err := MongoDeleteCrawlerJob(m, t.Date)
+	ok := MongoDeleteCrawlerJob(m, t.Date)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
-	if err == nil {
+	if ok == nil {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Crawler job successfully deleted", Status: true})
 		return
