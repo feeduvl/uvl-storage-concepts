@@ -441,7 +441,7 @@ func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) er
 	return nil
 }
 
-func MongoDeleteCrawlerJobMongoDeleteCrawlerJob(mongoClient *mgo.Session, date time.time) error {
+func MongoDeleteCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	_, err := mongoClient.
 		DB(database).
 		C(collectionCrawlerJobs).
