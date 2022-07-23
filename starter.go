@@ -651,14 +651,16 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	crawlerJobDate := params["date"]
 
-	fmt.Printf("REST call: deleteAnnotation - %s\n", crawlerJobDate)
+	fmt.Printf("REST call: deleteCrawlerJob - %s\n", crawlerJobDate)
 
-	// parse time
-	t, err := time.Parse(time.RFC3339, crawlerJobDate)
+	_t := "{\"date\": \"" + crawlerJobDate + "\"}"
+	var t Date
+	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
 	if err != nil {
-		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, crawlerJobDate)
+		return
 	}
 
 	m := mongoClient.Copy()
