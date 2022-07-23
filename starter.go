@@ -654,8 +654,7 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("REST call: deleteAnnotation - %s\n", crawlerJobDate)
 
 	// parse time
-	var t Date
-	myDate, err := time.Parse("2022-06-28T16:30:26.967Z", crawlerJobDate)
+	t, err := time.Parse(time.RFC3339, crawlerJobDate)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
