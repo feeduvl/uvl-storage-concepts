@@ -28,6 +28,7 @@ const (
 	fieldResultStartedAt   = "started_at"
 	fieldResultMethodName  = "method"
 	fieldCrawlerJobName    = "DatasetName"
+	fieldCrawlerJobDate    = "Date"
 )
 
 func panicError(err error) {
@@ -438,4 +439,13 @@ func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) er
 	}
 
 	return nil
+}
+
+func MongoDeleteCrawlerJobMongoDeleteCrawlerJob(mongoClient *mgo.Session, date time.time) error {
+	_, err := mongoClient.
+		DB(database).
+		C(collectionCrawlerJobs).
+		RemoveAll(bson.M{fieldCrawlerJobDate: date})
+
+	return err
 }

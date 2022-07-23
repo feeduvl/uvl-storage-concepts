@@ -68,6 +68,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/detection/result/{result}", deleteResult).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", deleteAnnotation).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/agreement/name/{agreement}", deleteAgreement).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs/{job}", deleteCrawlerJob).Methods("DELETE")
 
 	return router
 }
@@ -645,4 +646,28 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	// send response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	crawlerJobDate := params["date"]
+
+	fmt.Printf("REST call: deleteAnnotation - %s\n", crawlerJobDate)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	err := MongoDeleteCrawlerJob(m, crawlerJobDate)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if err == nil {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Crawler job successfully deleted", Status: true})
+		return
+	} else {
+		fmt.Printf("error deleting crawler job: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
+	}
 }
