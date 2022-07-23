@@ -651,6 +651,11 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf(params)
 	crawlerJobDate := params["job"]
 
+	// error finding
+	for k, v := range mux.Vars(request) {
+		log.Printf("key=%v, value=%v", k, v)
+	}
+
 	fmt.Printf("REST call: deleteCrawlerJob: ")
 	fmt.Printf(crawlerJobDate)
 
