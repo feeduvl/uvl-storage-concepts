@@ -659,7 +659,7 @@ func deleteCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
-		fmt.Printf("ERROR parsing date: %s date: %s\n", err, result)
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, crawlerJobDate)
 		return
 	}
 
