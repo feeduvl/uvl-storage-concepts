@@ -421,7 +421,7 @@ func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
 		panic(err)
 	}
 
-	fmt.Printf("getAllAgreements result: %v\n", crawlerJobs)
+	fmt.Printf("getCrawlerJobs result: %v\n", crawlerJobs)
 
 	return crawlerJobs
 
