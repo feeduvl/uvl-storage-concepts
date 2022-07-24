@@ -28,7 +28,7 @@ const (
 	fieldResultStartedAt   = "started_at"
 	fieldResultMethodName  = "method"
 	fieldCrawlerJobName    = "DatasetName"
-	fieldCrawlerJobDate    = "Date"
+	fieldCrawlerJobDate    = "date"
 )
 
 func panicError(err error) {
