@@ -137,6 +137,22 @@ type Date struct {
 	Date time.Time `json:"date"`
 }
 
+type CrawlerRequest struct {
+	Subreddits        []string `json:"subreddits" bson:"subreddits"`
+	blacklistComments []string `json:"blacklist_comments" bson:"blacklist_comments"`
+	blacklistPosts    []string `json:"blacklist_posts" bson:"blacklist_posts"`
+	commentDepth      int      `json:"comment_depth" bson:"comment_depth"`
+	datasetName       string   `json:"dataset_name" bson:"dataset_name"`
+	dateFrom          string   `json:"date_from" bson:"date_from"`
+	dateTo            string   `json:"date_to" bson:"date_to"`
+	minLengthComments int      `json:"min_length_comments" bson:"min_length_comments"`
+	minLengthPosts    int      `json:"min_length_posts" bson:"min_length_posts"`
+	newLimit          int      `json:"new_limit" bson:"new_limit"`
+	postSelection     string   `json:"post_selection" bson:"post_selection"`
+	replaceEmojis     bool     `json:"replace_emojis" bson:"replace_emojis"`
+	replaceUrls       bool     `json:"replace_urls" bson:"replace_urls"`
+}
+
 // Crawler Jobs model
 type CrawlerJobs struct {
 	SubredditName string    `validate:"nonzero" json:"subreddit_names" bson:"subreddit_names"`
@@ -144,7 +160,7 @@ type CrawlerJobs struct {
 	Occurrence    int       `json:"occurrence" bson:"occurrence"`
 	NumberPosts   int       `json:"number_posts" bson:"number_posts"`
 	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
-	Request       string    `validate:"nonzero" json:"request" bson:"request"`
+	Request       CrawlerRequest `validate:"nonzero" json:"request" bson:"request"`
 }
 
 func (result *Result) validate() error {
