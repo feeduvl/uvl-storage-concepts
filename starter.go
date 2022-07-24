@@ -625,6 +625,7 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	s, err := ioutil.ReadAll(r.Body) 
 	if err != nil {
 		panic(err) 
+	}
 
 	err = json.Unmarshal(s, &crawlerJobs)
 	if err != nil {
