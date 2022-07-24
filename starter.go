@@ -620,6 +620,7 @@ func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 
 func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	var crawlerJobs CrawlerJobs
+	fmt.Printf("%+v\n", r.Body)
 	err := json.NewDecoder(r.Body).Decode(&crawlerJobs)
 	fmt.Printf("%+v\n", crawlerJobs)
 
