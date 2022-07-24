@@ -626,6 +626,8 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err) 
 	}
+	fmt.Printf("Post Request body: ")
+	fmt.Printf(string(s))
 
 	err = json.Unmarshal(s, &crawlerJobs)
 	if err != nil {
