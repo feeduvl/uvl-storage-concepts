@@ -621,6 +621,7 @@ func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	var crawlerJobs CrawlerJobs
 	err := json.NewDecoder(r.Body).Decode(&crawlerJobs)
+	fmt.Printf("%+v\n", crawlerJobs)
 
 	fmt.Printf("postCrawlerJobs called. Crawler Job of: %s\n", crawlerJobs.DatasetName)
 
