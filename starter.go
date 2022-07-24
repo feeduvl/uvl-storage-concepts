@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"io/ioutil"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -620,17 +621,19 @@ func getCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 
 func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	var crawlerJobs CrawlerJobs
-	fmt.Printf("%+v\n", r.Body)
-	err := json.NewDecoder(r.Body).Decode(&crawlerJobs)
-	fmt.Printf("%+v\n", crawlerJobs)
 
-	fmt.Printf("postCrawlerJobs called. Crawler Job of: %s\n", crawlerJobs.DatasetName)
+	s, err := ioutil.ReadAll(r.Body) 
+	if err != nil {
+		panic(err) 
 
+	err = json.Unmarshal(s, &crawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
+		panic(err) 
 	}
+
+	fmt.Printf("%+v\n", crawlerJobs)
 
 	// insert data into the db
 	m := mongoClient.Copy()
