@@ -17,7 +17,7 @@ const (
 	collectionRelationships = "relationship"
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
-	collectionCrawlerJobs   = "crawler_jobs"
+	collectionCrawlerJobs   = "crawler_jobs2"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -430,7 +430,7 @@ func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) er
 	crawlerJob.Date = time.Now()
 	fmt.Printf("Inserting Data: ")
 	fmt.Printf("%+v\n", crawlerJob)
-	query := bson.M{fieldCrawlerJobName: crawlerJob.DatasetName}
+	query := bson.M{fieldCrawlerJobDate: crawlerJob.Date}
 	update := bson.M{"$set": crawlerJob}
 
 	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Upsert(query, update)
