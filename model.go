@@ -138,6 +138,17 @@ type Date struct {
 }
 
 type CrawlerRequest struct {
+	
+}
+
+// Crawler Jobs model
+type CrawlerJobs struct {
+	SubredditName string    `validate:"nonzero" json:"subreddit_names" bson:"subreddit_names"`
+	Date          time.Time `validate:"nonzero" json:"date" bson:"date"`
+	Occurrence    int       `json:"occurrence" bson:"occurrence"`
+	NumberPosts   int       `json:"number_posts" bson:"number_posts"`
+	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
+	// request data
 	Subreddits        []string `json:"subreddits" bson:"subreddits"`
 	blacklistComments []string `json:"blacklist_comments" bson:"blacklist_comments"`
 	blacklistPosts    []string `json:"blacklist_posts" bson:"blacklist_posts"`
@@ -151,16 +162,6 @@ type CrawlerRequest struct {
 	postSelection     string   `json:"post_selection" bson:"post_selection"`
 	replaceEmojis     bool     `json:"replace_emojis" bson:"replace_emojis"`
 	replaceUrls       bool     `json:"replace_urls" bson:"replace_urls"`
-}
-
-// Crawler Jobs model
-type CrawlerJobs struct {
-	SubredditName string    `validate:"nonzero" json:"subreddit_names" bson:"subreddit_names"`
-	Date          time.Time `validate:"nonzero" json:"date" bson:"date"`
-	Occurrence    int       `json:"occurrence" bson:"occurrence"`
-	NumberPosts   int       `json:"number_posts" bson:"number_posts"`
-	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
-	Request       CrawlerRequest `validate:"nonzero" json:"request" bson:"request"`
 }
 
 func (result *Result) validate() error {
