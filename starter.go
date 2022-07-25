@@ -641,22 +641,22 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	//for _, entry := range gjson.Parse(s).Get("request.subreddits").Array() {
 	//	crawlerJobs.Request.Subreddits = append(crawlerJobs.Request.Subreddits, entry.String())
 	//}
-	for _, bc := range gjson.Parse(s).Get("request.blacklist_comments").Array() {
+	for _, bc := range gjson.Parse(string(s)).Get("request.blacklist_comments").Array() {
 		crawlerJobs.Request.blacklistComments = append(crawlerJobs.Request.blacklistComments, bc.String())
 	}
-	for _, bp := range gjson.Parse(s).Get("request.blacklist_posts").Array() {
+	for _, bp := range gjson.Parse(string(s)).Get("request.blacklist_posts").Array() {
 		crawlerJobs.Request.blacklistPosts = append(crawlerJobs.Request.blacklistPosts, bp.String())
 	}
-	crawlerJobs.Request.commentDepth = int(gjson.Parse(s).Get("request.comment_depth").Int())
-	crawlerJobs.Request.datasetName = gjson.Parse(s).Get("request.dataset_name").String()
-	crawlerJobs.Request.dateFrom = gjson.Parse(s).Get("request.date_from").String()
-	crawlerJobs.Request.dateTo = gjson.Parse(s).Get("request.date_to").String()
-	crawlerJobs.Request.minLengthComments = int(gjson.Parse(s).Get("request.min_length_comments").Int())
-	crawlerJobs.Request.minLengthPosts = int(gjson.Parse(s).Get("request.min_length_posts").Int())
-	crawlerJobs.Request.newLimit = int(gjson.Parse(s).Get("request.new_limit").Int())
-	crawlerJobs.Request.postSelection = gjson.Parse(s).Get("request.post_selection").String()
-	crawlerJobs.Request.replaceEmojis = gjson.Parse(s).Get("request.replace_emojis").Bool()
-	crawlerJobs.Request.replaceUrls = gjson.Parse(s).Get("request.replace_urls").Bool()
+	crawlerJobs.Request.commentDepth = int(gjson.Parse(string(s)).Get("request.comment_depth").Int())
+	crawlerJobs.Request.datasetName = gjson.Parse(string(s)).Get("request.dataset_name").String()
+	crawlerJobs.Request.dateFrom = gjson.Parse(string(s)).Get("request.date_from").String()
+	crawlerJobs.Request.dateTo = gjson.Parse(string(s)).Get("request.date_to").String()
+	crawlerJobs.Request.minLengthComments = int(gjson.Parse(string(s)).Get("request.min_length_comments").Int())
+	crawlerJobs.Request.minLengthPosts = int(gjson.Parse(string(s)).Get("request.min_length_posts").Int())
+	crawlerJobs.Request.newLimit = int(gjson.Parse(string(s)).Get("request.new_limit").Int())
+	crawlerJobs.Request.postSelection = gjson.Parse(string(s)).Get("request.post_selection").String()
+	crawlerJobs.Request.replaceEmojis = gjson.Parse(string(s)).Get("request.replace_emojis").Bool()
+	crawlerJobs.Request.replaceUrls = gjson.Parse(string(s)).Get("request.replace_urls").Bool()
 
 	fmt.Printf("%+v\n", crawlerJobs)
 
