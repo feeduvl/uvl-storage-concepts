@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/tidwall/gjson"
 )
 
 const (
@@ -635,6 +636,21 @@ func postCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err) 
 	}
+
+	// unmarshal/json.decode could not be made work for nested struct in reasonable time 
+	crawlerJobs.Request.Subreddits = gjson.Parse(s).Get("request.subreddits").String()
+	crawlerJobs.Request.blacklistComments = gjson.Parse(s).Get("request.blacklist_comments").String()
+	crawlerJobs.Request.blacklistPosts = gjson.Parse(s).Get("request.blacklist_posts").String()
+	crawlerJobs.Request.commentDepth = gjson.Parse(s).Get("request.comment_depth").String()
+	crawlerJobs.Request.datasetName = gjson.Parse(s).Get("request.dataset_name").String()
+	crawlerJobs.Request.dateFrom = gjson.Parse(s).Get("request.date_from").String()
+	crawlerJobs.Request.dateTo = gjson.Parse(s).Get("request.date_to").String()
+	crawlerJobs.Request.minLengthComments = gjson.Parse(s).Get("request.min_length_comments").String()
+	crawlerJobs.Request.minLengthPosts = gjson.Parse(s).Get("request.min_length_posts").String()
+	crawlerJobs.Request.newLimit = gjson.Parse(s).Get("request.new_limit").String()
+	crawlerJobs.Request.postSelection = gjson.Parse(s).Get("request.post_selection").String()
+	crawlerJobs.Request.replaceEmojis = gjson.Parse(s).Get("request.replace_emojis").String()
+	crawlerJobs.Request.replaceUrls = gjson.Parse(s).Get("request.replace_urls").String()
 
 	fmt.Printf("%+v\n", crawlerJobs)
 
