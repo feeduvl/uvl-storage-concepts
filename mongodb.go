@@ -429,7 +429,7 @@ func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
 func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) error {
 	crawlerJob.Date = time.Now()
 	fmt.Printf("%+v\n", crawlerJob)
-	query := bson.M{fieldCrawlerJobName: crawlerJob.datasetName}
+	query := bson.M{fieldCrawlerJobName: crawlerJob.DatasetName}
 	update := bson.M{"$set": crawlerJob}
 
 	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Upsert(query, update)
