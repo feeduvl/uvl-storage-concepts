@@ -100,7 +100,7 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	panicError(err)
 }
 
-// MongoInsertAnnotation returns ok if the dataset was inserted or already existed
+// MongoInsertAnnotation returns ok if the annotation was inserted or already existed
 func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) error {
 	annotation.LastUpdated = time.Now()
 	query := bson.M{fieldAnnotationName: annotation.Name}
@@ -114,7 +114,7 @@ func MongoInsertAnnotation(mongoClient *mgo.Session, annotation Annotation) erro
 	return nil
 }
 
-// MongoInsertAgreement returns ok if the dataset was inserted or already existed
+// MongoInsertAgreement returns ok if the agreement was inserted or already existed
 func MongoInsertAgreement(mongoClient *mgo.Session, agreement Agreement) error {
 	agreement.LastUpdated = time.Now()
 	var isCompleted = calculateIsCompleted(agreement)
@@ -405,7 +405,6 @@ func MongoGetAllResults(mongoClient *mgo.Session) []Result {
 
 	return results
 }
-
 
 // MongoGetCrawlerJobs returns all registered crawler jobs
 func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
