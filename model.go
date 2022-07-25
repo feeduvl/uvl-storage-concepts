@@ -147,7 +147,6 @@ type CrawlerJobs struct {
 	Date          time.Time `validate:"nonzero" json:"date" bson:"date"`
 	Occurrence    int       `json:"occurrence" bson:"occurrence"`
 	NumberPosts   int       `json:"number_posts" bson:"number_posts"`
-	DatasetName   string    `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
 	// request data
 	Subreddits        []string `json:"subreddits" bson:"subreddits"`
 	blacklistComments []string `json:"blacklist_comments" bson:"blacklist_comments"`
