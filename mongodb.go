@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"context"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -433,9 +432,8 @@ func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) er
 	fmt.Printf("%+v\n", crawlerJob)
 	//query := bson.M{fieldCrawlerJobDate: crawlerJob.Date}
 	//update := bson.M{"$set": crawlerJob}
-	ctx := context.TODO()
 
-	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).InsertOne(ctx, crawlerJob)
+	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Insert(&crawlerJob{})
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
 		return err
