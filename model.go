@@ -139,18 +139,18 @@ type Date struct {
 
 type CrawlerRequest struct {
 	Subreddits        []string `json:"subreddits" bson:"subreddits"`
-	blacklistComments []string `json:"blacklist_comments" bson:"blacklist_comments"`
-	blacklistPosts    []string `json:"blacklist_posts" bson:"blacklist_posts"`
-	commentDepth      int      `json:"comment_depth" bson:"comment_depth"`
-	datasetName       string   `json:"dataset_name" bson:"dataset_name"`
-	dateFrom          string   `json:"date_from" bson:"date_from"`
-	dateTo            string   `json:"date_to" bson:"date_to"`
-	minLengthComments int      `json:"min_length_comments" bson:"min_length_comments"`
-	minLengthPosts    int      `json:"min_length_posts" bson:"min_length_posts"`
-	newLimit          int      `json:"new_limit" bson:"new_limit"`
-	postSelection     string   `json:"post_selection" bson:"post_selection"`
-	replaceEmojis     bool     `json:"replace_emojis" bson:"replace_emojis"`
-	replaceUrls       bool     `json:"replace_urls" bson:"replace_urls"`
+	DatasetName       string   `json:"dataset_name" bson:"dataset_name"`
+	BlacklistComments []string `json:"blacklist_comments" bson:"blacklist_comments"`
+	BlacklistPosts    []string `json:"blacklist_posts" bson:"blacklist_posts"`
+	CommentDepth      int      `json:"comment_depth" bson:"comment_depth"`
+	DateFrom          string   `json:"date_from" bson:"date_from"`
+	DateTo            string   `json:"date_to" bson:"date_to"`
+	MinLengthComments int      `json:"min_length_comments" bson:"min_length_comments"`
+	MinLengthPosts    int      `json:"min_length_posts" bson:"min_length_posts"`
+	NewLimit          int      `json:"new_limit" bson:"new_limit"`
+	PostSelection     string   `json:"post_selection" bson:"post_selection"`
+	ReplaceEmojis     bool     `json:"replace_emojis" bson:"replace_emojis"`
+	ReplaceUrls       bool     `json:"replace_urls" bson:"replace_urls"`
 }
 
 
