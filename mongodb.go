@@ -428,13 +428,13 @@ func MongoGetCrawlerJobs(mongoClient *mgo.Session) []CrawlerJobs {
 
 func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) error {
 	crawlerJob.Date = time.Now()
-	fmt.Printf("Inserting Data: ")
-	fmt.Printf("%+v\n", crawlerJob)
 	//query := bson.M{fieldCrawlerJobDate: crawlerJob.Date}
 	//update := bson.M{"$set": crawlerJob}
 
 	var v interface{}
 	v = crawlerJob
+	fmt.Printf("Inserting Data: ")
+	fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionCrawlerJobs).Insert(v)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
