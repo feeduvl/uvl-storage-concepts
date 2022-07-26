@@ -433,7 +433,7 @@ func MongoInsertCrawlerJobs(mongoClient *mgo.Session, crawlerJob CrawlerJobs) er
 	//query := bson.M{fieldCrawlerJobDate: crawlerJob.Date}
 	//update := bson.M{"$set": crawlerJob}
 
-	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Insert(crawlerJob...)
+	err := mongoClient.DB(database).C(collectionCrawlerJobs).Insert(crawlerJob...)
 	if err != nil && !mgo.IsDup(err) {
 		fmt.Println(err)
 		return err
