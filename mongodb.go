@@ -142,7 +142,7 @@ func calculateIsCompleted(agreement Agreement) bool {
 // MongoInsertDataset returns ok if the dataset was inserted or already existed
 func MongoInsertDataset(mongoClient *mgo.Session, dataset Dataset) error {
 	query := bson.M{fieldDatasetName: dataset.Name}
-	update := bson.M{"$set": dataset}
+	update := bson.M{"$set": dataset, "$push": {"Documents": dataset.Documents}}
 	_, err := mongoClient.DB(database).C(collectionDataset).Upsert(query, update)
 
 	return handleErrorInsert(err)
