@@ -179,7 +179,8 @@ func postDetectionResult(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("postDetectionResult called. Method: %s, Time: %s \n", result.Method, result.StartedAt)
-	fmt.Printf(result.Codes)
+	fmt.Printf("Got result: %v\n", result)
+
 
 	// validate result
 	err = validateResult(result)
