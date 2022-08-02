@@ -454,7 +454,7 @@ func MongoDeleteCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 }
 
 func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
-	query := bson.M(fieldCrawlerJobDate: date)
+	query := bson.M{fieldCrawlerJobDate: date}
 	update := bson.M{"$set": bson.M{"occurrence": 0}}
 	_, err := mongoClient.DB(database).C(collectionCrawlerJobs).Update(query, update)
 
