@@ -49,6 +49,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs", postAppReviewCrawlerJobs).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -69,9 +70,11 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", deleteAnnotation).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/agreement/name/{agreement}", deleteAgreement).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs/{job}", deleteCrawlerJob).Methods("DELETE")
+	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", deleteAppReviewCrawlerJob).Methods("DELETE")
 
 	// Update
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs/{job}", updateCrawlerJob).Methods("PUT")
+	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", updateAppReviewCrawlerJob).Methods("PUT")
 
 
 	return router
@@ -722,6 +725,133 @@ func updateCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	m := mongoClient.Copy()
 	defer m.Close()
 	ok := MongoUpdateCrawlerJob(m, t.Date)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if ok == nil {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Crawler job successfully deleted", Status: true})
+		return
+	} else {
+		fmt.Printf("error deleting crawler job: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
+	}
+}
+
+func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
+
+	fmt.Printf("REST call: getCrawlerJobs\n")
+
+	// retrieve all dataset names
+	m := mongoClient.Copy()
+	defer m.Close()
+	crawlerJobs := MongoGetAppReviewCrawlerJobs(m)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(crawlerJobs)
+
+}
+
+func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
+	var crawlerJobs CrawlerJobs
+
+	s, err := ioutil.ReadAll(r.Body) 
+	if err != nil {
+		panic(err) 
+	}
+
+	err = json.Unmarshal(s, &crawlerJobs)
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err) 
+	}
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	err = MongoInsertAppReviewCrawlerJobs(m, crawlerJobs)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+}
+
+func deleteAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	crawlerJobDate := params["job"]
+
+	// error finding
+	for k, v := range mux.Vars(r) {
+		log.Printf("key=%v, value=%v", k, v)
+	}
+
+	fmt.Printf("REST call: deleteCrawlerJob: ")
+	fmt.Printf(crawlerJobDate)
+
+	_t := "{\"date\": \"" + crawlerJobDate + "\"}"
+	var t Date
+	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, crawlerJobDate)
+		return
+	}
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	ok := MongoDeleteAppReviewCrawlerJob(m, t.Date)
+
+	// write the response
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
+	if ok == nil {
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Crawler job successfully deleted", Status: true})
+		return
+	} else {
+		fmt.Printf("error deleting crawler job: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
+	}
+}
+
+
+
+func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	crawlerJobDate := params["job"]
+
+	// error finding
+	for k, v := range mux.Vars(r) {
+		log.Printf("key=%v, value=%v", k, v)
+	}
+
+	fmt.Printf("REST call: updateCrawlerJob: ")
+	fmt.Printf(crawlerJobDate)
+
+	_t := "{\"date\": \"" + crawlerJobDate + "\"}"
+	var t Date
+	err := json.NewDecoder(strings.NewReader(_t)).Decode(&t)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not parse date", Status: false})
+		fmt.Printf("ERROR parsing date: %s date: %s\n", err, crawlerJobDate)
+		return
+	}
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	ok := MongoUpdateAppReviewCrawlerJob(m, t.Date)
 
 	// write the response
 	w.Header().Set(contentTypeKey, contentTypeValJSON)

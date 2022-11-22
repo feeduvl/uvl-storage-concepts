@@ -164,6 +164,28 @@ type CrawlerJobs struct {
 	Request       CrawlerRequest `json:"request" bson:"request"` 
 }
 
+type AppReviewCrawlerRequest struct {
+	AppUrl string `json: "app_url" bson: "app_url"`
+	DatasetName	string `json: "dataset_name" bson:"dataset_name"`
+	BlacklistPosts [] string `json:"blacklist_posts" bson:"blacklist_posts"`
+	DateTo string `json:"date_from" bson:"date_from"`
+	DateFrom string `json:"date_to" bson:"date_to"`
+	MinLengthPosts int `json:"min_length_posts" bson:"min_length_posts"`
+	NewLimit int `json:"new_limit" bson:"new_limit"`
+	PostSelection string `json:"post_selection" bson:"post_selection"`
+	ReplaceUrls bool `json:"replace_urls" bson:"replace_urls"`
+	ReplaceEmojis bool `json:"replace_emojjis" bson:"replace_emojis"`
+}
+
+type AppReviewCrawlerJobs struct {
+	AppUrl string `validate:"nonzero" json:"app_url" bson:"app_url"`
+	Date time.Time `validate:"nonzero" json:"date" bson:"date"`
+	Occurrence int `json:"occurrence" bson:"occurrence"`
+	NumberPosts int `json:"number_posts" bson:"number_posts"`
+	DatasetName string `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
+	Request AppReviewCrawlerRequest `json:"request" bson:"request"`
+}
+
 func (result *Result) validate() error {
 	return validator.Validate(result)
 }

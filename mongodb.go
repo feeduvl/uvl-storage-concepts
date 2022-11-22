@@ -460,3 +460,44 @@ func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 
 	return err
 }
+
+func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJob AppReviewCrawlerJobs) error{
+	appReviewCrawlerJob.Date = time.Now()
+
+	var v interface{}
+	v = appReviewCrawlerJob
+	fmt.Printf("Inserting Data: ")
+	fmt.Printf("%+v\n", v)
+	err := mongoClient.DB(database).C(collectionCrawlerJobs).Insert(v)
+	if err != nil && !mgo.IsDup(err){
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func MongoGetAppReviewCrawlerJobs(mongoClient *mso.Session) [] AppReviewCrawlerJobs {
+	var crawlerJobs []AppReviewCrawlerJobs
+	err := mongoClient.DB.(database).C(collectionCrawlerJobs).Find(bson.M{}).Select().All(&crawlerJobs)
+
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(error)
+	}
+	fmt.Printf("getAppReviewCrawlerJobs result:  %v\n", crawlerJobs)
+
+	return crawlerJobs
+}
+
+func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
+	, err := mongoClient.DB(database).C(collectionCrawlerJobs).RemoveAll(bson.M{fieldCrawlerJobDate: date})
+	return err
+}
+
+func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
+	query := bson.M{fieldCrawlerJobDate: date}
+	update := bson.M{"$set": bson.M{"occurrence": 0}}
+	err := mongoClient.DB(database).C(collectionCrawlerJobs).Update(query, update)
+
+	return err 
+}
