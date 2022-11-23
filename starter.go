@@ -49,7 +49,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/relationships/", postAllRelationshipNames).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
-	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs", postAppReviewCrawlerJobs).Methods("POST")
+	//router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs", postAppReviewCrawlerJobs).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
