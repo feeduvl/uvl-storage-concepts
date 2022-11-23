@@ -460,7 +460,7 @@ func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 
 	return err
 }
-
+/*
 func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJob AppReviewCrawlerJobs) error{
 	appReviewCrawlerJob.Date = time.Now()
 
@@ -488,12 +488,12 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mso.Session) [] AppReviewCrawlerJ
 
 	return crawlerJobs
 }
-/*
+
 func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	err := mongoClient.DB(database).C(collectionCrawlerJobs).RemoveAll(bson.M{fieldCrawlerJobDate: date})
 	return err
 }
-*/
+
 
 func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	query := bson.M{fieldCrawlerJobDate: date}
@@ -502,3 +502,4 @@ func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) er
 
 	return err 
 }
+*/
