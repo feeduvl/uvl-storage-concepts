@@ -70,11 +70,11 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/name/{annotation}", deleteAnnotation).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/agreement/name/{agreement}", deleteAgreement).Methods("DELETE")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs/{job}", deleteCrawlerJob).Methods("DELETE")
-	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", deleteAppReviewCrawlerJob).Methods("DELETE")
+	//router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", deleteAppReviewCrawlerJob).Methods("DELETE")
 
 	// Update
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs/{job}", updateCrawlerJob).Methods("PUT")
-	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", updateAppReviewCrawlerJob).Methods("PUT")
+	//router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs/{job}", updateAppReviewCrawlerJob).Methods("PUT")
 
 
 	return router
@@ -738,7 +738,7 @@ func updateCrawlerJob(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
 	}
 }
-
+/*
 func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getCrawlerJobs\n")
@@ -754,7 +754,7 @@ func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 	_ = json.NewEncoder(w).Encode(crawlerJobs)
 
 }
-/*
+
 func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	var crawlerJobs CrawlerJobs
 
@@ -783,7 +783,7 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
-*/
+
 
 func deleteAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 
@@ -866,3 +866,4 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
 	}
 }
+*/
