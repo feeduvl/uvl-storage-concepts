@@ -754,7 +754,7 @@ func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 	_ = json.NewEncoder(w).Encode(crawlerJobs)
 
 }
-
+/*
 func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	var crawlerJobs CrawlerJobs
 
@@ -783,6 +783,7 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }
+*/
 
 func deleteAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 
