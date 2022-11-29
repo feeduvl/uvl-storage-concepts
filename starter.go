@@ -763,7 +763,7 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 		panic(err) 
 	}
 
-	err = json.Unmarshal(s, &CrawlerJobs)
+	err = json.Unmarshal(s, &crawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
