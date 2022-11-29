@@ -738,7 +738,7 @@ func updateCrawlerJob(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
 	}
 }
-/*
+
 func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 
 	fmt.Printf("REST call: getCrawlerJobs\n")
@@ -866,4 +866,4 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewEncoder(w).Encode(ResponseMessage{Message: "Could not delete crawler job", Status: false})
 	}
 }
-*/
+

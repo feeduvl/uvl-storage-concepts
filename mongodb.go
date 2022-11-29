@@ -460,7 +460,7 @@ func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 
 	return err
 }
-/*
+
 func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJob AppReviewCrawlerJobs) error{
 	appReviewCrawlerJob.Date = time.Now()
 
@@ -476,9 +476,9 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	return nil
 }
 
-func MongoGetAppReviewCrawlerJobs(mongoClient *mso.Session) [] AppReviewCrawlerJobs {
+func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJobs {
 	var crawlerJobs []AppReviewCrawlerJobs
-	err := mongoClient.DB.(database).C(collectionCrawlerJobs).Find(bson.M{}).Select().All(&crawlerJobs)
+	err := mongoClient.DB.(database).C(collectionCrawlerJobs).Find(bson.M{}).Select(bson.M{"app_url": 1, "date": 1, "occurrence": 1, "number_posts": 1, "dataset_name": 1, "request": 1}).All(&crawlerJobs)
 
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -502,4 +502,4 @@ func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) er
 
 	return err 
 }
-*/
+
