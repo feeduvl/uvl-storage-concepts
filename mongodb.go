@@ -478,8 +478,11 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 
 func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJobs {
 	var crawlerJobs []AppReviewCrawlerJobs
-	err := mongoClient.DB.(database).C(collectionCrawlerJobs).Find(bson.M{}).Select(bson.M{"app_url": 1, "date": 1, "occurrence": 1, "number_posts": 1, "dataset_name": 1, "request": 1}).All(&crawlerJobs)
 
+	err := mongoClient.
+		DB(database).
+		C(collectionCrawlerJobs).Find(bson.M{}).Select(bson.M{"app_url": 1, "date": 1, "occurrence": 1, "number_posts": 1, "dataset_name": 1, "request": 1}).All(&crawlerJobs)
+	
 	if err != nil {
 		fmt.Println("ERR", err)
 		panic(error)
