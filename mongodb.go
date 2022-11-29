@@ -485,7 +485,7 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJ
 	
 	if err != nil {
 		fmt.Println("ERR", err)
-		panic(error)
+		panic(err)
 	}
 	fmt.Printf("getAppReviewCrawlerJobs result:  %v\n", crawlerJobs)
 
@@ -493,7 +493,11 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJ
 }
 
 func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
-	err := mongoClient.DB(database).C(collectionCrawlerJobs).RemoveAll(bson.M{fieldCrawlerJobDate: date})
+	_, err := mongoClient.
+	DB(database).
+	C(collectionCrawlerJobs).
+	RemoveAll(bson.M{fieldCrawlerJobDate: date})
+	
 	return err
 }
 

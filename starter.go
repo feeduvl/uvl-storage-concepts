@@ -756,7 +756,7 @@ func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
-	var crawlerJobs CrawlerJobs
+	var AppReviewCrawlerJobs CrawlerJobs
 
 	s, err := ioutil.ReadAll(r.Body) 
 	if err != nil {
