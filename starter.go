@@ -772,13 +772,14 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
+	/*
 	err = MongoInsertAppReviewCrawlerJobs(m, crawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err)
 	}
-
+	*/
 	// send response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
