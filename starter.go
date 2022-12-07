@@ -756,14 +756,14 @@ func getAppReviewCrawlerJobs(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
-	var AppReviewCrawlerJobs CrawlerJobs
+	var appReviewCrawlerJobs AppReviewCrawlerJobs
 
 	s, err := ioutil.ReadAll(r.Body) 
 	if err != nil {
 		panic(err) 
 	}
 
-	err = json.Unmarshal(s, &AppReviewCrawlerJobs)
+	err = json.Unmarshal(s, &appReviewCrawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
@@ -772,14 +772,14 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	/*
-	err = MongoInsertAppReviewCrawlerJobs(m, crawlerJobs)
+	
+	err = MongoInsertAppReviewCrawlerJobs(m, appReviewCrawlerJobs)
 	if err != nil {
 		fmt.Printf("ERROR %s\n", err)
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err)
 	}
-	*/
+	
 	// send response
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set(contentTypeKey, contentTypeValJSON)
