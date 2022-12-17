@@ -63,7 +63,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/agreement/all", getAllAgreements).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
-	router.HandleFunc("/hitec/repository/concepts/app_review_crawler_jobs/all", getAppCrawlerJobs).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/app_review_crawler_jobs/all", getAppReviewCrawlerJobs).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
