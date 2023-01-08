@@ -37,6 +37,10 @@ type Token struct {
 	NumToreCodes int    `json:"num_tore_codes" bson:"num_tore_codes"`
 }
 
+type Tore struct {
+    Name         string `json:"tore" bson:"tore"`
+}
+
 type Annotation struct {
 	UploadedAt  time.Time `validate:"nonzero" json:"uploaded_at" bson:"uploaded_at"`
 	LastUpdated time.Time `json:"last_updated" bson:"last_updated"`
@@ -44,6 +48,7 @@ type Annotation struct {
 	Name    string `validate:"nonzero" json:"name" bson:"name"`
 	Dataset string `validate:"nonzero" json:"dataset" bson:"dataset"`
 
+	Tores 			  []Tore             `json:"tores" bson:"tores"`
 	Docs              []DocWrapper       `json:"docs" bson:"docs"`
 	Tokens            []Token            `json:"tokens" bson:"tokens"`
 	Codes             []Code             `json:"codes" bson:"codes"`
