@@ -18,7 +18,7 @@ const (
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
 	collectionCrawlerJobs   = "crawler_jobs2"
-	collectionAppReviewCrawlerJobs = "crawler_jobs3"
+	collectionA_R_CrawlerJobs = "crawler_jobs3"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -469,7 +469,7 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	v = appReviewCrawlerJob
 	fmt.Printf("Inserting Data: ")
 	fmt.Printf("%+v\n", v)
-	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
+	err := mongoClient.DB(database).C(collectionA_R_CrawlerJobs).Insert(v)
 	if err != nil && !mgo.IsDup(err){
 		fmt.Println(err)
 		return err
@@ -482,7 +482,7 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJ
 
 	err := mongoClient.
 		DB(database).
-		C(collectionAppReviewCrawlerJobs).Find(bson.M{}).Select(bson.M{"app_url": 1, "date": 1, "app_occurrence": 1, "app_number_posts": 1, "dataset_name": 1, "request": 1}).All(&crawlerJobs)
+		C(collectionA_R_rawlerJobs).Find(bson.M{}).Select(bson.M{"app_url": 1, "date": 1, "app_occurrence": 1, "app_number_posts": 1, "dataset_name": 1, "request": 1}).All(&crawlerJobs)
 	
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -496,7 +496,7 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJ
 func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	_, err := mongoClient.
 		DB(database).
-		C(collectionAppReviewCrawlerJobs).
+		C(collectionA_R_CrawlerJobs).
 		RemoveAll(bson.M{fieldCrawlerJobDate: date})
 	
 	return err
@@ -506,7 +506,7 @@ func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) er
 func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	query := bson.M{fieldCrawlerJobDate: date}
 	update := bson.M{"$set": bson.M{"occurrence": 0}}
-	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Update(query, update)
+	err := mongoClient.DB(database).C(collectionA_R_CrawlerJobs).Update(query, update)
 
 	return err 
 }
