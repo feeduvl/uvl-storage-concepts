@@ -467,12 +467,6 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 
 	var v interface{}
 	v = appReviewCrawlerJob
-	fmt.Printf("Validating AppReviewCrawlerJobs struct: %+v\n", appReviewCrawlerJob)
-	validationErr := validator.Validate(appReviewCrawlerJob)
-	if validationErr != nil {
-	    fmt.Printf("Validation error: %s\n", validationErr)
-	    return validationErr
-	}
 	fmt.Printf("Inserting Data: ")
 	fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
