@@ -464,6 +464,7 @@ func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 
 func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJob AppReviewCrawlerJobs) error{
 	appReviewCrawlerJob.Date = time.Now()
+	fmt.Prinln(appReviewCrawlerJob.Request.AppName)
 	var v interface{}
 	v = appReviewCrawlerJob
 	fmt.Println("Inserting Data: ")
