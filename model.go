@@ -166,6 +166,7 @@ type CrawlerJobs struct {
 }
 
 type AppReviewCrawlerRequest struct {
+	AppName string `json: "app_name" bson: "app_name"`
 	AppUrl string `json: "app_url" bson: "app_url"`
 	DatasetName	string `json: "dataset_name" bson:"dataset_name"`
 	BlacklistPosts [] string `json:"blacklist_posts" bson:"blacklist_posts"`
@@ -179,6 +180,7 @@ type AppReviewCrawlerRequest struct {
 }
 
 type AppReviewCrawlerJobs struct {
+	AppName string `validate:"nonzero" json:"app_name" bson:"app_name"`
 	AppUrl string `validate:"nonzero" json:"app_url" bson:"app_url"`
 	Date time.Time `validate:"nonzero" json:"date" bson:"date"`
 	Occurrence int `json:"occurrence" bson:"occurrence"`
