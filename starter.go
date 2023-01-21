@@ -763,7 +763,6 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err) 
 	}
-	var requestData map[string]interface{}
 	err = json.Unmarshal(s, &appReviewCrawlerJobs)
 	fmt.Printf("%+v\n", appReviewCrawlerJobs)
 	if err != nil {	
