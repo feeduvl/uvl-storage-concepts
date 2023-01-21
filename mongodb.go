@@ -18,7 +18,7 @@ const (
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
 	collectionCrawlerJobs   = "crawler_jobs2"
-	collectionAppReviewCrawlerJobs = "crawler_jobs_reviews"
+	collectionAppReviewCrawlerJobs = "crawler_jobs_for_reviews"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
