@@ -466,15 +466,10 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	appReviewCrawlerJob.Date = time.Now()
 	var v interface{}
 	v = appReviewCrawlerJob
-	fmt.Printf("Inserting Data: ")
+	fmt.Println("Inserting Data: ")
 	if v, ok := v.(AppReviewCrawlerJobs); ok {
-		fmt.Println(v.AppName)
-	}
-	if v, ok := v.(AppReviewCrawlerJobs); ok {
-		fmt.Println(v.AppUrl)
-	}
-	if v, ok := v.(AppReviewCrawlerJobs); ok {
-		fmt.Println(v.DatasetName)
+		fmt.Printf("Request Name: ")
+		fmt.Println(v.Request.AppName)
 	}
 	//fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
