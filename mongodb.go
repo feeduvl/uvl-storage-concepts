@@ -467,9 +467,15 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	var v interface{}
 	v = appReviewCrawlerJob
 	fmt.Printf("Inserting Data: ")
-	fmt.Printf(v.App_name)
-	fmt.Printf(v.App_url)
-	fmt.Printf(v.DatasetName)
+	if v, ok := v.(AppReviewCrawlerJobs); ok {
+		fmt.Println(v.AppName)
+	}
+	if v, ok := v.(AppReviewCrawlerJobs); ok {
+		fmt.Println(v.AppUrl)
+	}
+	if v, ok := v.(AppReviewCrawlerJobs); ok {
+		fmt.Println(v.DatasetName)
+	}
 	//fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
 	if err != nil && !mgo.IsDup(err){
