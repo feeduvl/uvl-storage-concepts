@@ -166,8 +166,8 @@ type CrawlerJobs struct {
 }
 
 type AppReviewCrawlerRequest struct {
-	AppName string `json: "app_name" bson: "app_name"`
-	AppUrl string `json: "app_url" bson: "app_url"`
+	AppName string `json:"app_name" bson:"app_name"`
+	AppUrl string `json: "app_url" bson:"app_url"`
 	DatasetName	string `json: "dataset_name" bson:"dataset_name"`
 	BlacklistPosts [] string `json:"blacklist_posts" bson:"blacklist_posts"`
 	DateTo string `json:"date_to" bson:"date_to"`
