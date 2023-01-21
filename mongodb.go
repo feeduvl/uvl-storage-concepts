@@ -18,7 +18,7 @@ const (
 	collectionTores         = "tores"
 	collectionAgreement     = "agreement"
 	collectionCrawlerJobs   = "crawler_jobs2"
-	collectionARCrawlerJobs = "app_review_crawler_jobs"
+	collectionAppRreviewCrawlerJobs = "app_review_crawler_jobs"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -469,7 +469,7 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	v = appReviewCrawlerJob
 	fmt.Printf("Inserting Data: ")
 	fmt.Printf("%+v\n", v)
-	err := mongoClient.DB(database).C(collectionARCrawlerJobs).Insert(v)
+	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
 	if err != nil && !mgo.IsDup(err){
 		fmt.Println(err)
 		return err
@@ -496,7 +496,7 @@ func MongoGetAppReviewCrawlerJobs(mongoClient *mgo.Session) [] AppReviewCrawlerJ
 func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	_, err := mongoClient.
 		DB(database).
-		C(collectionARCrawlerJobs).
+		C(collectionAppReviewCrawlerJobs).
 		RemoveAll(bson.M{fieldCrawlerJobDate: date})
 	
 	return err
@@ -506,7 +506,7 @@ func MongoDeleteAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) er
 func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 	query := bson.M{fieldCrawlerJobDate: date}
 	update := bson.M{"$set": bson.M{"occurrence": 0}}
-	err := mongoClient.DB(database).C(collectionARCrawlerJobs).Update(query, update)
+	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Update(query, update)
 
 	return err 
 }
