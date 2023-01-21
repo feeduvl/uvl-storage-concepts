@@ -470,7 +470,7 @@ func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJ
 	fmt.Println("Inserting Data: ")
 	if v, ok := v.(AppReviewCrawlerJobs); ok {
 		fmt.Printf("Request Name: ")
-		fmt.Println(v.Request.AppName)
+		fmt.Println(v.Request)
 	}
 	//fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
