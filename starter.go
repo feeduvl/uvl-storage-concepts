@@ -764,13 +764,14 @@ func postAppReviewCrawlerJobs(w http.ResponseWriter, r *http.Request) {
 		panic(err) 
 	}
 	fmt.Printf("Read request body: %s \n", s)
-	err = json.Unmarshal(s, &appReviewCrawlerJobs)
+	var requestData map[string]interface{}
+	err = json.Unmarshal(s, &requestData)
 	if err != nil {	
 		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
 		w.WriteHeader(http.StatusBadRequest)
 		panic(err) 
 	}
-
+	fmt.Printf("Parsed request body: %s \n", requestData)
 	m := mongoClient.Copy()
 	defer m.Close()
 	
