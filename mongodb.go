@@ -464,12 +464,13 @@ func MongoUpdateCrawlerJob(mongoClient *mgo.Session, date time.Time) error {
 
 func MongoInsertAppReviewCrawlerJobs(mongoClient *mgo.Session, appReviewCrawlerJob AppReviewCrawlerJobs) error{
 	appReviewCrawlerJob.Date = time.Now()
-	fmt.Printf("App Review Crawler Job: ")
-	fmt.Printf(appReviewCrawlerJob.AppName)
 	var v interface{}
 	v = appReviewCrawlerJob
 	fmt.Printf("Inserting Data: ")
-	fmt.Printf("%+v\n", v)
+	fmt.Printf(v.app_name)
+	fmt.Printf(v.app_url)
+	fmt.Printf(v.dataset_name)
+	//fmt.Printf("%+v\n", v)
 	err := mongoClient.DB(database).C(collectionAppReviewCrawlerJobs).Insert(v)
 	if err != nil && !mgo.IsDup(err){
 		fmt.Println(err)
