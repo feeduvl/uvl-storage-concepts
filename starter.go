@@ -64,6 +64,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/app_review_crawler_jobs/all", getAppReviewCrawlerJobs).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/recommendationTores/{tokenName}", getRecommendationTores).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
@@ -340,6 +341,20 @@ func getAllToreTypes(w http.ResponseWriter, r *http.Request) {
 	} else {
 		_ = json.NewEncoder(w).Encode(bson.M{"tores": names})
 	}
+}
+
+func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
+    //TODO: Implement MongoDB
+    params := mux.Vars(r)
+    tokenName := params["tokenName"]
+    recommendationTores := []string{}
+    if strings.ToLower(tokenName) == "windows" {
+        recommendationTores = append(recommendationTores, "Software")
+        recommendationTores = append(recommendationTores, "Test")
+        recommendationTores = append(recommendationTores, "TestCategory")
+    }
+    w.WriteHeader(http.StatusOK)
+    _ = json.NewEncoder(w).Encode(recommendationTores)
 }
 
 func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
