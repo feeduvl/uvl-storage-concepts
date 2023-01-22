@@ -354,7 +354,7 @@ func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
         recommendationTores = append(recommendationTores, "TestCategory")
     }
     w.WriteHeader(http.StatusOK)
-    _ = json.NewEncoder(w).Encode(recommendationTores)
+    _ = json.NewEncoder(w).Encode(bson.M{"recommendationTores": recommendationTores})
 }
 
 func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
