@@ -45,6 +45,7 @@ type Annotation struct {
 	Dataset string `validate:"nonzero" json:"dataset" bson:"dataset"`
 
 	Tores 			  []string           `json:"tores" bson:"tores"`
+	ShowRecommendationtore	bool         `json:"show_recommendationtore" bson:"show_recommendationtore"`
 	Docs              []DocWrapper       `json:"docs" bson:"docs"`
 	Tokens            []Token            `json:"tokens" bson:"tokens"`
 	Codes             []Code             `json:"codes" bson:"codes"`
