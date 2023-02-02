@@ -183,7 +183,7 @@ type AppReviewCrawlerRequest struct {
 type AppReviewCrawlerJobs struct {
 	AppName string `validate:"nonzero" json:"app_name" bson:"app_name"`
 	Date time.Time `validate:"nonzero" json:"date" bson:"date"`
-	Occurrence int `json:"app_occurrence" bson:"app_occurrence"`
+	Occurrence int `validate:"nonzero" json:"app_occurrence" bson:"app_occurrence"`
 	NumberPosts int `json:"app_number_posts" bson:"app_number_posts"`
 	DatasetName string `validate:"nonzero" json:"dataset_name" bson:"dataset_name"`
 	Request AppReviewCrawlerRequest `json:"request" bson:"request"`
