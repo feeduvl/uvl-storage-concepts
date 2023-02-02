@@ -510,3 +510,18 @@ func MongoUpdateAppReviewCrawlerJob(mongoClient *mgo.Session, date time.Time) er
 	return err 
 }
 
+func MongoGetAllAnnotationsCodes(mongoClient *mgo.Session) []Annotation {
+
+    var annotations []Annotation
+
+    err := mongoClient.
+        DB(database).
+        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"codes.name": 1, "codes.tore": 1}).All(&annotations)
+
+    if err != nil {
+        fmt.Println("ERR", err)
+        panic(err)
+    }
+
+    return annotations
+}
