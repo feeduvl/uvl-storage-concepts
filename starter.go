@@ -65,6 +65,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/app_review_crawler_jobs/all", getAppReviewCrawlerJobs).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotation/recommendationTores/{tokenName}", getRecommendationTores).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotationcodes/all", getAllCodesFromAnnotations).Methods("GET")
 
 	// Delete
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", deleteDataset).Methods("DELETE")
@@ -884,3 +885,16 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getAllCodesFromAnnotations(w http.ResponseWriter, r *http.Request) {
+    fmt.Printf("REST call: getAllAnnotationCodes\n")
+
+    // retrieve all dataset names
+    m := mongoClient.Copy()
+    defer m.Close()
+    annotations := MongoGetAllAnnotationsCodes(m)
+
+    // write the response
+    w.Header().Set(contentTypeKey, contentTypeValJSON)
+    w.WriteHeader(http.StatusOK)
+    _ = json.NewEncoder(w).Encode(annotations)
+}
