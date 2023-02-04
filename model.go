@@ -52,6 +52,11 @@ type Annotation struct {
 	TORERelationships []TORERelationship `json:"tore_relationships" bson:"tore_relationships"`
 }
 
+type Recommendation struct {
+	Codename  string   `bson:"codename" json:"codename"`
+	Torecodes []string `bson:"torecodes" json:"torecodes"`
+}
+
 // end Annotation model
 // The Agreement model
 

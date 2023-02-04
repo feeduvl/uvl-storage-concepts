@@ -50,6 +50,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/store/annotation/tores/", postAllToreTypes).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/reddit_crawler/jobs", postCrawlerJobs).Methods("POST")
 	router.HandleFunc("/hitec/repository/concepts/store/app_review_crawler/jobs", postAppReviewCrawlerJobs).Methods("POST")
+	router.HandleFunc("/hitec/repository/concepts/store/recommendations/", postRecommendations).Methods("POST")
 
 	// Get
 	router.HandleFunc("/hitec/repository/concepts/dataset/name/{dataset}", getDataset).Methods("GET")
@@ -342,20 +343,6 @@ func getAllToreTypes(w http.ResponseWriter, r *http.Request) {
 	} else {
 		_ = json.NewEncoder(w).Encode(bson.M{"tores": names})
 	}
-}
-
-func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
-    //TODO: Implement MongoDB
-    params := mux.Vars(r)
-    tokenName := params["tokenName"]
-    recommendationTores := []string{}
-    if strings.ToLower(tokenName) == "windows" {
-        recommendationTores = append(recommendationTores, "Software")
-        recommendationTores = append(recommendationTores, "Test")
-        recommendationTores = append(recommendationTores, "TestCategory")
-    }
-    w.WriteHeader(http.StatusOK)
-    _ = json.NewEncoder(w).Encode(bson.M{"recommendationTores": recommendationTores})
 }
 
 func postAllRelationshipNames(w http.ResponseWriter, r *http.Request) {
@@ -885,6 +872,20 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
+    //TODO: Implement MongoDB
+    params := mux.Vars(r)
+    tokenName := params["tokenName"]
+    recommendationTores := []string{}
+    if strings.ToLower(tokenName) == "windows" {
+        recommendationTores = append(recommendationTores, "Software")
+        recommendationTores = append(recommendationTores, "Test")
+        recommendationTores = append(recommendationTores, "TestCategory")
+    }
+    w.WriteHeader(http.StatusOK)
+    _ = json.NewEncoder(w).Encode(bson.M{"recommendationTores": recommendationTores})
+}
+
 func getAllCodesFromAnnotations(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("REST call: getAllAnnotationCodes\n")
 
@@ -897,4 +898,39 @@ func getAllCodesFromAnnotations(w http.ResponseWriter, r *http.Request) {
     w.Header().Set(contentTypeKey, contentTypeValJSON)
     w.WriteHeader(http.StatusOK)
     _ = json.NewEncoder(w).Encode(annotations)
+}
+
+// store all recommendations
+func postRecommendations(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("REST call: postRecommendations\n")
+	var recommendations []Recommendation
+	err := json.NewDecoder(r.Body).Decode(&recommendations)
+
+	if err != nil {
+		fmt.Printf("ERROR decoding json: %s for request body: %v\n", err, r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// insert data into the db
+	m := mongoClient.Copy()
+	defer m.Close()
+
+	err = MongoDeleteRecommendationAll(m)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	err = MongoInsertManyRecommendations(m, recommendations)
+	if err != nil {
+		fmt.Printf("ERROR %s\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		panic(err)
+	}
+
+	// send response
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set(contentTypeKey, contentTypeValJSON)
 }

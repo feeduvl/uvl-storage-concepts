@@ -19,6 +19,7 @@ const (
 	collectionAgreement     = "agreement"
 	collectionCrawlerJobs   = "crawler_jobs2"
 	collectionAppReviewCrawlerJobs = "crawler_jobs_for_app_reviews3"
+	collectionRecommendation       = "recommendation"
 
 	fieldRelationshipNames = "relationship_names"
 	fieldToreTypes         = "tores"
@@ -516,7 +517,7 @@ func MongoGetAllAnnotationsCodes(mongoClient *mgo.Session) []Annotation {
 
     err := mongoClient.
         DB(database).
-        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"codes.name": 1, "codes.tore": 1}).All(&annotations)
+        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"name": 1, "codes.name": 1, "codes.tore": 1}).All(&annotations)
 
     if err != nil {
         fmt.Println("ERR", err)
@@ -524,4 +525,38 @@ func MongoGetAllAnnotationsCodes(mongoClient *mgo.Session) []Annotation {
     }
 
     return annotations
+}
+
+func MongoInsertManyRecommendations(mongoClient *mgo.Session, recommendations []Recommendation) error {
+
+	fmt.Println("Inserting Recommendations")
+
+	docs := make([]interface{}, len(recommendations))
+	for i, u := range recommendations {
+		docs[i] = u
+	}
+
+	err := mongoClient.DB(database).C(collectionRecommendation).Insert(docs...)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+// MongoGetRecommendation returns a recommendation
+func MongoDeleteRecommendationAll(mongoClient *mgo.Session) error {
+	
+	fmt.Println("Deleting Recommendations")
+	
+	_, err := mongoClient.
+		DB(database).
+		C(collectionRecommendation).
+		RemoveAll(bson.M{})
+
+	if err != nil { 
+		fmt.Println(err)
+	}
+
+	return err
 }
