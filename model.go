@@ -177,7 +177,7 @@ type AppReviewCrawlerRequest struct {
 	NewLimit int `json:"new_limit" bson:"new_limit"`
 	PostSelection string `json:"post_selection" bson:"post_selection"`
 	ReplaceUrls bool `json:"replace_urls" bson:"replace_urls"`
-	ReplaceEmojis bool `json:"replace_emojjis" bson:"replace_emojis"`
+	ReplaceEmojis bool `json:"replace_emojis" bson:"replace_emojis"`
 }
 
 type AppReviewCrawlerJobs struct {
