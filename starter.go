@@ -873,17 +873,20 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
-    //TODO: Implement MongoDB
-    params := mux.Vars(r)
-    tokenName := params["tokenName"]
-    recommendationTores := []string{}
-    if strings.ToLower(tokenName) == "windows" {
-        recommendationTores = append(recommendationTores, "Software")
-        recommendationTores = append(recommendationTores, "Test")
-        recommendationTores = append(recommendationTores, "TestCategory")
-    }
-    w.WriteHeader(http.StatusOK)
-    _ = json.NewEncoder(w).Encode(bson.M{"recommendationTores": recommendationTores})
+    // get request param
+	params := mux.Vars(r)
+	tokenName := params["tokenName"] //TODO: codename
+
+	fmt.Println("REST call: getRecommendationTores, params: ", tokenName)
+
+	m := mongoClient.Copy()
+	defer m.Close()
+	recommendation := MongoGetRecommendation(m, tokenName)
+	recommendationTores := []string{}
+	recommendationTores = append(recommendationTores, recommendation.Torecodes...)
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(bson.M{"recommendationTores": recommendationTores})
 }
 
 func getAllCodesFromAnnotations(w http.ResponseWriter, r *http.Request) {

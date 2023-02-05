@@ -31,6 +31,7 @@ const (
 	fieldResultMethodName  = "method"
 	fieldCrawlerJobName    = "DatasetName"
 	fieldCrawlerJobDate    = "date"
+	fieldRecommendationCodename = "codename"
 )
 
 func panicError(err error) {
@@ -559,4 +560,27 @@ func MongoDeleteRecommendationAll(mongoClient *mgo.Session) error {
 	}
 
 	return err
+}
+
+// MongoGetRecommendation returns a recommendation
+func MongoGetRecommendation(mongoClient *mgo.Session, codename string) Recommendation {
+	var recommendations []Recommendation
+	err := mongoClient.
+		DB(database).
+		C(collectionRecommendation).
+		Find(bson.M{fieldRecommendationCodename: codename}).
+		All(&recommendations)
+	
+	if err != nil {
+		fmt.Println("ERR", err)
+		panic(err)
+	}
+
+	// Return empty Recommendation if not found
+	if len(recommendations) == 0 {
+		v := Recommendation{}
+		return v
+	} else {
+		return recommendations[0]
+	}
 }
