@@ -875,7 +875,7 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
     // get request param
 	params := mux.Vars(r)
-	tokenName := params["tokenName"] //TODO: codename
+	tokenName := strings.ToLower(params["tokenName"]) //TODO: codename
 
 	fmt.Println("REST call: getRecommendationTores, params: ", tokenName)
 
