@@ -65,7 +65,7 @@ func makeRouter() *mux.Router {
 	router.HandleFunc("/hitec/repository/concepts/annotation/dataset/{dataset}", getAnnotationsForDataset).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/crawler_jobs/all", getCrawlerJobs).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/app_review_crawler_jobs/all", getAppReviewCrawlerJobs).Methods("GET")
-	router.HandleFunc("/hitec/repository/concepts/annotation/recommendationTores/{tokenName}", getRecommendationTores).Methods("GET")
+	router.HandleFunc("/hitec/repository/concepts/annotation/recommendationTores/{codename}", getRecommendationTores).Methods("GET")
 	router.HandleFunc("/hitec/repository/concepts/annotationcodes/all", getAllCodesFromAnnotations).Methods("GET")
 
 	// Delete
@@ -875,13 +875,13 @@ func updateAppReviewCrawlerJob(w http.ResponseWriter, r *http.Request) {
 func getRecommendationTores(w http.ResponseWriter, r *http.Request) {
     // get request param
 	params := mux.Vars(r)
-	tokenName := strings.ToLower(params["tokenName"]) //TODO: codename
+	codename := params["codename"]
 
-	fmt.Println("REST call: getRecommendationTores, params: ", tokenName)
+	fmt.Println("REST call: getRecommendationTores, params: ", codename)
 
 	m := mongoClient.Copy()
 	defer m.Close()
-	recommendation := MongoGetRecommendation(m, tokenName)
+	recommendation := MongoGetRecommendation(m, codename)
 	recommendationTores := []string{}
 	recommendationTores = append(recommendationTores, recommendation.Torecodes...)
 

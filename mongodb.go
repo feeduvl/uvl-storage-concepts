@@ -101,6 +101,17 @@ func MongoCreateCollectionIndexes(mongoClient *mgo.Session) {
 	resultCollection := mongoClient.DB(database).C(collectionResult)
 	err = resultCollection.EnsureIndex(resultIndex)
 	panicError(err)
+
+	// Index Recommendation
+    recomendationIndex := mgo.Index{
+        Key:        []string{fieldRecommendationCodename},
+        Unique:     true,
+        Background: true,
+        Sparse:     true,
+    }
+    recomendationCollection := mongoClient.DB(database).C(collectionRecommendation)
+    err = recomendationCollection.EnsureIndex(recomendationIndex)
+    panicError(err)
 }
 
 // MongoInsertAnnotation returns ok if the annotation was inserted or already existed
