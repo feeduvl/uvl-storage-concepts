@@ -591,7 +591,7 @@ func MongoGetRecommendation(mongoClient *mgo.Session, codename string) Recommend
 	if len(recommendations) == 0 {
 		v := Recommendation{}
 		return v
-	} else {
-		return recommendations[0]
 	}
+	
+	return recommendations[0]
 }
