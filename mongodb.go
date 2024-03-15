@@ -529,7 +529,7 @@ func MongoGetAllAnnotationsCodes(mongoClient *mgo.Session) []Annotation {
 
     err := mongoClient.
         DB(database).
-        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"name": 1, "codes.name": 1, "codes.tore": 1}).All(&annotations)
+        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"name": 1, "codes.name": 1, "codes.tore": 1, "sentenceTokenisation_activated": 1}).All(&annotations)
 
     if err != nil {
         fmt.Println("ERR", err)
