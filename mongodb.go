@@ -377,7 +377,7 @@ func MongoGetAllAgreements(mongoClient *mgo.Session) []Agreement {
 
 	err := mongoClient.
 		DB(database).
-		C(collectionAgreement).Find(bson.M{}).Select(bson.M{"created_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "annotation_names": 1, "is_completed": 1}).All(&agreements)
+		C(collectionAgreement).Find(bson.M{}).Select(bson.M{"created_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "annotation_names": 1, "sentence_tokenization_enabled_for_agreement": 1, "is_completed": 1}).All(&agreements)
 
 	if err != nil {
 		fmt.Println("ERR", err)

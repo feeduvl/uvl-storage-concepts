@@ -95,6 +95,7 @@ type Agreement struct {
 	AgreementStatistics []AgreementStatistics `json:"agreement_statistics" bson:"agreement_statistics"`
 
 	IsCompleted bool `json:"is_completed" bson:"is_completed"`
+	SentenceTokenizationEnabledForAgreement bool `json:"sentence_tokenization_enabled_for_agreement" bson:"sentence_tokenization_enabled_for_agreement"`
 }
 
 // end Agreement model
