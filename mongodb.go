@@ -358,7 +358,7 @@ func MongoGetAllAnnotations(mongoClient *mgo.Session) []Annotation {
 
 	err := mongoClient.
 		DB(database).
-		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "sentenceTokenisation_activated": 1}).All(&annotations)
+		C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"uploaded_at": 1, "last_updated": 1, "name": 1, "dataset": 1, "sentence_tokenization_enabled_for_annotation": 1}).All(&annotations)
 
 	if err != nil {
 		fmt.Println("ERR", err)
@@ -529,7 +529,7 @@ func MongoGetAllAnnotationsCodes(mongoClient *mgo.Session) []Annotation {
 
     err := mongoClient.
         DB(database).
-        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"name": 1, "codes.name": 1, "codes.tore": 1, "sentenceTokenisation_activated": 1}).All(&annotations)
+        C(collectionAnnotation).Find(bson.M{}).Select(bson.M{"name": 1, "codes.name": 1, "codes.tore": 1, "sentence_tokenization_enabled_for_annotation": 1}).All(&annotations)
 
     if err != nil {
         fmt.Println("ERR", err)
